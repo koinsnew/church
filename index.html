@@ -129,6 +129,16 @@
     .form-error.show { display: block; }
     .form-actions { display: flex; align-items: center; gap: 10px; margin-top: 14px; }
     .form-actions .spacer { flex: 1; }
+    .near-split { flex: 1; text-align: right; font-size: 14px; font-weight: 600; color: var(--ink-2); }
+    .name-row { display: flex; gap: 8px; align-items: flex-end; }
+    .name-row .field { flex: 1; margin-bottom: 0; }
+    .tr-all { display: inline-flex; align-items: center; gap: 6px; height: 50px; padding: 0 12px; border: 1px solid var(--rule-strong); border-radius: 8px; background: #fff; font-size: 15px; font-weight: 700; color: var(--ink-2); cursor: pointer; white-space: nowrap; user-select: none; }
+    .tr-all input { width: 20px; height: 20px; margin: 0; accent-color: var(--navy); }
+    .tr-all:has(input:checked) { border-color: var(--navy); background: var(--navy-soft); color: var(--navy); }
+    .name-block { margin-bottom: 14px; }
+    .line-note { grid-column: 2 / -1; font-size: 14px; color: var(--amber); font-weight: 600; }
+    .line.locked .money-wrap input, .line.locked .tr { opacity: 0.55; pointer-events: none; }
+    .narrow-only { display: none; }
     .btn-primary { height: 54px; padding: 0 26px; border: none; border-radius: 8px; background: var(--navy); color: #fff; font-size: 17px; font-weight: 800; cursor: pointer; white-space: nowrap; }
     .btn-primary:hover { background: var(--navy-hover); }
     .btn-primary:disabled { background: #8597b3; cursor: wait; }
@@ -138,11 +148,12 @@
     .btn-danger-text:hover { background: var(--red-soft); border-color: #f0c4c0; }
     form.editing .btn-danger-text { display: inline-flex; align-items: center; }
 
-    .recent { margin-top: 16px; border-top: 1px dashed var(--rule-strong); padding-top: 12px; display: none; }
+    .recent { margin-bottom: 16px; border: 1px solid var(--amber-line); background: var(--amber-soft); border-radius: 8px; padding: 8px 12px; display: none; }
     .recent.show { display: block; }
-    .recent-title { font-size: 14px; font-weight: 700; color: var(--ink-3); margin-bottom: 4px; }
+    .recent-title { font-size: 14px; font-weight: 800; color: var(--amber); margin-bottom: 2px; display: flex; align-items: center; gap: 6px; }
+    .recent-row .btn-secondary { background: var(--sheet); }
     .recent-row { display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 4px 0; }
-    .recent-row + .recent-row { border-top: 1px solid var(--rule); }
+    .recent-row + .recent-row { border-top: 1px solid #ecd9b0; }
     .recent-row .r-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
     .recent-row .r-name { font-weight: 700; }
     .recent-row .r-detail { font-size: 14px; color: var(--ink-2); overflow-wrap: anywhere; }
@@ -172,6 +183,7 @@
     .lg-person:hover { background: rgba(255,255,255,0.6); }
     .lg-person .p-name { flex: 1; min-width: 0; font-weight: 600; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
     .lg-person .p-amt { font-weight: 800; white-space: nowrap; }
+    .lg-person .entry-chev { width: 16px; height: 16px; }
     .lg-person.is-removed .p-name > span:first-child, .lg-person.is-removed .p-amt { text-decoration: line-through; color: var(--ink-3); }
     .lg-foot { font-weight: 800; border-top: 3px double var(--ink-2); padding-top: 10px; padding-bottom: 6px; font-size: 16px; }
     .lg-foot .grand { font-family: var(--serif); font-size: 20px; color: var(--navy); }
@@ -225,7 +237,7 @@
     .dlg-text { font-size: 16px; color: var(--ink-2); line-height: 1.6; }
     .dlg-text b { color: var(--ink); }
     .dlg-actions { display: flex; flex-direction: column; gap: 8px; padding: 16px 24px 24px; }
-    .dlg-actions .btn-primary, .dlg-actions .btn-secondary, .dlg-actions .btn-danger { width: 100%; height: 52px; font-size: 17px; }
+    .dlg-actions .btn-primary, .dlg-actions .btn-secondary, .dlg-actions .btn-danger { width: 100%; height: auto; min-height: 52px; padding: 10px 16px; font-size: 17px; white-space: normal; line-height: 1.35; }
     .btn-danger { border: none; border-radius: 8px; background: var(--red); color: #fff; font-weight: 800; cursor: pointer; }
     .btn-danger:hover { background: #8f1c13; }
     .dlg-busy { display: flex; align-items: center; gap: 14px; }
@@ -252,7 +264,10 @@
     @media (max-width: 999px) {
       :root { --nav-h: 116px; }
       body { padding: var(--nav-h) 0 0; overflow: hidden; height: 100dvh; }
-      .top-nav { flex-wrap: wrap; align-content: center; padding: 8px 12px; row-gap: 8px; }
+      .top-nav { flex-wrap: wrap; align-content: center; padding: 8px 12px; row-gap: 8px; height: auto; }
+      body.has-pending .bottom-bar { display: none; }
+      .narrow-only { display: block; }
+      .pending-text small.narrow-only { color: var(--ink-2); }
       .top-nav .title { font-size: 20px; flex: 1; }
       .date-input-nav { width: 140px; font-size: 15px; padding: 0 8px; }
       .btn-ghost { padding: 0 12px; }
@@ -277,6 +292,7 @@
     }
     @media (max-width: 600px) { .lg-row { grid-template-columns: 1.4fr 0.7fr 1.3fr; } .lg-row > :nth-child(3), .lg-row > :nth-child(4) { display: none; } .lg-split { display: flex; } }
     @media (max-width: 420px) { .title-church { display: none; } }
+    @media (max-width: 370px) { .top-nav .title { display: none; } .nav-controls { width: 100%; } .date-input-nav { flex: 1; width: auto; } .name-row { flex-wrap: wrap; } .name-row .field { flex-basis: 100%; } }
     @media (max-width: 360px) {
       .bottom-bar { flex-direction: column; align-items: center; }
       .pending-bar { flex-wrap: wrap; } .pending-text { flex-basis: 100%; } .pending-bar .btn-primary { flex: 1; }
@@ -391,9 +407,9 @@
       </button>
     </div>
     <div class="panel-tabs" role="tablist" aria-label="화면 선택">
-      <button type="button" role="tab" aria-selected="false" data-tab="0">입력</button>
-      <button type="button" role="tab" aria-selected="true" data-tab="1">헌금 <span class="tab-count" id="tabCountInc"></span></button>
-      <button type="button" role="tab" aria-selected="false" data-tab="2">지출 <span class="tab-count" id="tabCountExp"></span></button>
+      <button type="button" role="tab" aria-selected="false" data-tab="0" aria-controls="panel0" id="tab0">입력</button>
+      <button type="button" role="tab" aria-selected="true" data-tab="1" aria-controls="panel1" id="tab1">헌금 <span class="tab-count" id="tabCountInc"></span></button>
+      <button type="button" role="tab" aria-selected="false" data-tab="2" aria-controls="panel2" id="tab2">지출 <span class="tab-count" id="tabCountExp"></span></button>
     </div>
   </header>
 
@@ -412,7 +428,7 @@
 
   <main class="panels" id="panels">
     <!-- ── 1. 입력 ── -->
-    <section class="panel" data-panel="0" aria-label="입력">
+    <section class="panel" data-panel="0" id="panel0" role="tabpanel" aria-labelledby="tab0">
       <div class="sheet">
         <div class="seg" role="group" aria-label="입력 종류">
           <button type="button" data-seg="income" aria-pressed="true">헌금 입력</button>
@@ -425,10 +441,14 @@
               <span id="incEditText"></span>
               <button type="button" class="btn-secondary" data-action="cancel-edit" data-type="income">수정 취소</button>
             </div>
-            <div class="field">
-              <label for="envName">성도 이름</label>
-              <input class="inp" type="text" id="envName" list="memberList" placeholder="이름 입력 또는 목록에서 선택">
-              <datalist id="memberList"></datalist>
+            <div class="recent" id="incRecent" role="status"><div class="recent-title">✓ 목록에 추가했습니다 · 아직 장부에 저장 전</div><div id="incRecentList"></div></div>
+            <div class="name-row name-block">
+              <div class="field">
+                <label for="envName">성도 이름</label>
+                <input class="inp" type="text" id="envName" list="memberList" placeholder="이름 입력 또는 목록에서 선택">
+                <datalist id="memberList"></datalist>
+              </div>
+              <label class="tr-all"><input type="checkbox" id="trAll">모두 계좌이체</label>
             </div>
             <div class="lines">
               <div class="lines-head"><span>헌금 종류</span><span>금액</span><span>계좌이체</span></div>
@@ -448,10 +468,9 @@
             <div class="form-error" id="incError" role="alert"></div>
             <div class="form-actions">
               <button type="button" class="btn-danger-text" id="btnIncDelete">이 성도 헌금 삭제</button>
-              <span class="spacer"></span>
-              <button type="submit" class="btn-primary" id="btnSaveInc">헌금 담기</button>
+              <span class="near-split num" id="nearSplit"></span>
+              <button type="submit" class="btn-primary" id="btnSaveInc">목록에 추가</button>
             </div>
-            <div class="recent" id="incRecent"><div class="recent-title">방금 담은 헌금 (아직 저장 전)</div><div id="incRecentList"></div></div>
           </form>
         </div>
 
@@ -461,6 +480,7 @@
               <span id="expEditText"></span>
               <button type="button" class="btn-secondary" data-action="cancel-edit" data-type="expense">수정 취소</button>
             </div>
+            <div class="recent" id="expRecent" role="status"><div class="recent-title">✓ 목록에 추가했습니다 · 아직 장부에 저장 전</div><div id="expRecentList"></div></div>
             <div class="field">
               <label for="expCategory">지출 항목</label>
               <input class="inp" type="text" id="expCategory" list="expCategoryList" placeholder="예: 식대, 주보 인쇄">
@@ -474,16 +494,15 @@
             <div class="form-actions">
               <button type="button" class="btn-danger-text" id="btnExpDelete">이 지출 삭제</button>
               <span class="spacer"></span>
-              <button type="submit" class="btn-primary" id="btnSaveExp">지출 담기</button>
+              <button type="submit" class="btn-primary" id="btnSaveExp">목록에 추가</button>
             </div>
-            <div class="recent" id="expRecent"><div class="recent-title">방금 담은 지출 (아직 저장 전)</div><div id="expRecentList"></div></div>
           </form>
         </div>
       </div>
     </section>
 
     <!-- ── 2. 헌금 (기본 화면) ── -->
-    <section class="panel" data-panel="1" aria-label="헌금 내역">
+    <section class="panel" data-panel="1" id="panel1" role="tabpanel" aria-labelledby="tab1">
       <div class="sheet">
         <h2 class="sheet-title">헌금 내역 <small id="incCount"></small></h2>
         <div class="ledger" id="incLedger"></div>
@@ -493,7 +512,7 @@
     </section>
 
     <!-- ── 3. 지출 ── -->
-    <section class="panel" data-panel="2" aria-label="지출 내역">
+    <section class="panel" data-panel="2" id="panel2" role="tabpanel" aria-labelledby="tab2">
       <div class="sheet">
         <h2 class="sheet-title">지출 내역 <small id="expCount"></small></h2>
         <div class="list-head"><span>항목</span><span class="screen-only">줄을 누르면 수정</span></div>
@@ -514,8 +533,8 @@
 
   <div class="bottom-stack" id="bottomStack">
     <div class="pending-bar">
-      <div class="pending-text"><span id="pendingTitle"></span><small id="pendingDetail"></small></div>
-      <button type="button" class="btn-secondary" id="btnDiscard">변경 취소</button>
+      <div class="pending-text"><span id="pendingTitle"></span><small id="pendingDetail"></small><small class="narrow-only num" id="pendingBal"></small></div>
+      <button type="button" class="btn-secondary" id="btnDiscard">모두 버리기</button>
       <button type="button" class="btn-primary" id="btnBatchSave">저장하기</button>
     </div>
     <div class="bottom-bar">
@@ -726,12 +745,17 @@
       setTab(i);
       if (swipeMode()) { const p = $('panels'); p.scrollTo({ left: i * p.clientWidth, behavior: smooth ? 'smooth' : 'auto' }); }
     }
+    function selectedTab() { const b = document.querySelector('.panel-tabs [aria-selected="true"]'); return b ? Number(b.dataset.tab) : HOME_PANEL; }
     function setTab(i) { document.querySelectorAll('.panel-tabs button').forEach(b => b.setAttribute('aria-selected', String(Number(b.dataset.tab) === i))); }
     function setSeg(type) {
       document.querySelectorAll('.seg button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.seg === type)));
       $('paneIncome').hidden = type !== 'income'; $('paneExpense').hidden = type !== 'expense';
     }
-    function syncBottomHeight() { document.documentElement.style.setProperty('--bottom-h', $('bottomStack').offsetHeight + 'px'); }
+    function syncBottomHeight() {
+      const root = document.documentElement.style;
+      root.setProperty('--bottom-h', $('bottomStack').offsetHeight + 'px');
+      if (swipeMode()) root.setProperty('--nav-h', document.querySelector('.top-nav').offsetHeight + 'px'); else root.removeProperty('--nav-h');
+    }
 
     // ── 시작 ─────────────────────────────────────
     window.addEventListener('DOMContentLoaded', function () {
@@ -744,7 +768,7 @@
       datePicker.setDate(ymd, false);
       currentDate = ymd;
       syncBottomHeight();
-      if (window.ResizeObserver) new ResizeObserver(syncBottomHeight).observe($('bottomStack'));
+      if (window.ResizeObserver) { const ro = new ResizeObserver(syncBottomHeight); ro.observe($('bottomStack')); ro.observe(document.querySelector('.top-nav')); }
       requestAnimationFrame(() => goPanel(HOME_PANEL, false));
       window.addEventListener('resize', () => { if (swipeMode()) goPanel(currentPanel(), false); });
       loadDashboard({});
@@ -761,7 +785,10 @@
       $('incomeForm').addEventListener('submit', e => { e.preventDefault(); submitIncome(); });
       $('expenseForm').addEventListener('submit', e => { e.preventDefault(); submitExpense(); });
       document.querySelectorAll('input.money').forEach(el => el.addEventListener('input', () => { formatMoneyInput(el); updateFormTotal(); }));
-      CAT_KEYS.forEach(k => $('tr_' + k).addEventListener('change', updateFormTotal));
+      CAT_KEYS.forEach(k => $('tr_' + k).addEventListener('change', () => { syncTrAll(); updateFormTotal(); }));
+      $('trAll').addEventListener('change', e => { CAT_KEYS.forEach(k => { if (!lockedCats().has(k)) $('tr_' + k).checked = e.target.checked; }); e.target.indeterminate = false; updateFormTotal(); });
+      $('incomeList').addEventListener('click', e => { if (e.target.closest('[data-goto-input]')) goPanel(0); });
+      $('incLedger').addEventListener('click', e => { if (e.target.closest('[data-goto-input]')) goPanel(0); });
       $('envWeeklyCount').addEventListener('input', e => { e.target.value = digits(e.target.value); });
       ['incomeForm', 'expenseForm'].forEach(id => $(id).addEventListener('input', () => clearErrors(id === 'incomeForm' ? 'income' : 'expense')));
       $('btnBatchSave').addEventListener('click', saveAllPending);
@@ -788,7 +815,34 @@
         document.querySelector(`.line[data-cat="${k}"]`).classList.toggle('has-amount', v > 0);
       });
       $('envTotal').textContent = won(sum) + '원';
-      $('envSplit').textContent = sum && trans ? `현금 ${won(cash)} · 이체 ${won(trans)}` : '';
+      const split = sum ? (trans && cash ? `현금 ${won(cash)} · 이체 ${won(trans)}` : trans ? `전액 이체` : `전액 현금`) : '';
+      $('envSplit').textContent = sum && trans && cash ? `현금 ${won(cash)} · 이체 ${won(trans)}` : '';
+      $('nearSplit').textContent = split;
+    }
+    // 추가하면 입력 화면 맨 위로: '목록에 추가했습니다' 카드와 다음 입력칸이 함께 보이게
+    function showAddedCard(focusId) {
+      const panel = $('panel0');
+      if (panel.scrollHeight > panel.clientHeight) panel.scrollTo({ top: 0, behavior: 'smooth' });
+      else if (!swipeMode()) window.scrollTo({ top: 0, behavior: 'smooth' });
+      setTimeout(() => $(focusId).focus({ preventScroll: true }), 350);
+    }
+    function syncTrAll() {
+      const keys = CAT_KEYS.filter(k => !lockedCats().has(k));
+      const on = keys.filter(k => $('tr_' + k).checked).length;
+      $('trAll').checked = on === keys.length && on > 0;
+      $('trAll').indeterminate = on > 0 && on < keys.length;
+    }
+    const lockedCats = () => (editMode && editMode.type === 'income' && editMode.locked) ? editMode.locked : new Set();
+    function formDirty(type) {
+      if (type === 'income') return ['envName', 'envWeeklyCount', 'envSpecialName', ...CAT_KEYS.map(k => 'amt_' + k)].some(id => $(id).value.trim());
+      return ['expCategory', 'expAmount'].some(id => $(id).value.trim());
+    }
+    async function confirmLeaveForm(type) {
+      if (!formDirty(type)) return true;
+      const what = editMode && editMode.type === type ? '고치던 내용' : '입력하던 내용';
+      return ask({ title: `${what}이 아직 목록에 추가되지 않았습니다`, tone: 'warn',
+        html: `${what}을 버리고 다른 항목을 열까요?`,
+        actions: [{ label: `${what} 버리고 열기`, value: true, kind: 'primary' }, { label: '계속 입력하기', value: false, kind: 'secondary' }] });
     }
 
     // ── 날짜 변경 ─────────────────────────────────
@@ -912,9 +966,9 @@
         lg += `<div class="lg-detail" id="lgd_${cat.key}" ${open ? '' : 'hidden'}>` + items.map(({ r, l }) => `
           <button type="button" class="lg-person ${r.status === 'removed' ? 'is-removed' : ''}" data-person="${esc(personOf(r))}" ${r.status === 'removed' ? 'disabled' : ''}>
             <span class="p-name"><span>${esc(personOf(r))}</span>${cat.key === 'special' || cat.key === 'weekly' ? `<span class="entry-detail">${esc(l.label)}</span>` : ''}${l.isTransfer ? '<span class="tag transfer">이체</span>' : ''}${statusTag(r.status)}</span>
-            <span class="p-amt num">${won(l.amount)}원</span></button>`).join('') + `</div>`;
+            <span class="p-amt num">${won(l.amount)}원</span>${r.status === 'removed' ? '' : CHEV}</button>`).join('') + `</div>`;
       });
-      if (!t.peopleCount) lg += `<div class="empty">아직 입력한 헌금이 없습니다. ‘입력’ 화면에서 첫 헌금을 입력해주세요.</div>`;
+      if (!t.peopleCount) lg += `<div class="empty">아직 입력한 헌금이 없습니다.<br><button type="button" class="btn-secondary" data-goto-input style="margin-top:10px">헌금 입력하러 가기</button></div>`;
       lg += `<div class="lg-row lg-foot"><span>합계</span><span class="num">${t.peopleCount}명</span><span class="num">${won(t.cash)}</span><span class="num">${won(t.transfer)}</span><span class="grand num">${won(t.income)}원</span></div><div class="lg-split num"><span>현금 ${won(t.cash)}</span><span>이체 ${won(t.transfer)}</span></div>`;
       $('incLedger').innerHTML = lg;
       $('incCount').textContent = t.peopleCount ? `${t.peopleCount}명` : '';
@@ -961,11 +1015,12 @@
       const parts = [];
       if (c.inc) parts.push(`헌금 ${c.inc}명`);
       if (c.exp) parts.push(`지출 ${c.exp}건`);
+      $('pendingBal').textContent = `저장 후 잔고 ${won(t.balance)}원`;
       $('pendingTitle').innerHTML = `<span class="wide-only">저장하지 않은 </span>변경 ${c.total}건`;
       $('pendingDetail').innerHTML = esc(parts.join(' · ')) + '<span class="wide-only"> · 저장해야 장부에 남습니다</span>';
-      $('btnBatchSave').textContent = `${c.total}건 저장하기`;
-      $('tabCountInc').textContent = c.inc ? `(${c.inc})` : '';
-      $('tabCountExp').textContent = c.exp ? `(${c.exp})` : '';
+      $('btnBatchSave').textContent = `${c.total}건 장부에 저장`;
+      $('tabCountInc').textContent = c.inc ? `(${c.inc}명)` : '';
+      $('tabCountExp').textContent = c.exp ? `(${c.exp}건)` : '';
       syncBottomHeight();
 
       // 출력용
@@ -987,20 +1042,20 @@
       });
       const recent = groups.slice(-3).reverse();
       $('incRecent').classList.toggle('show', recent.length > 0);
-      $('incRecentList').innerHTML = recent.map(g => `
+      $('incRecentList').innerHTML = recent.slice(0, 2).map(g => `
         <div class="recent-row ${g.fresh ? 'flash' : ''}">
           <span class="r-text"><span class="r-name">${esc(g.person)}</span><span class="r-detail num">${detailHtml(g.lines)}</span></span>
           <span class="r-amt num">${won(g.lines.reduce((s, l) => s + l.amount, 0))}원</span>
-          <button type="button" class="btn-secondary" data-group="${esc(g.id)}">되돌리기</button>
+          <button type="button" class="btn-secondary" data-group="${esc(g.id)}">빼기</button>
         </div>`).join('');
       changes.incomes.forEach(r => delete r._fresh);
-      const er = changes.expenses.slice(-3).reverse();
+      const er = changes.expenses.slice(-2).reverse();
       $('expRecent').classList.toggle('show', er.length > 0);
       $('expRecentList').innerHTML = er.map(r => `
         <div class="recent-row ${r._fresh ? 'flash' : ''}">
           <span class="r-text"><span class="r-name">${esc(r.category)}</span></span>
           <span class="r-amt num">${won(r.amount)}원</span>
-          <button type="button" class="btn-secondary" data-id="${esc(r.tempId)}">되돌리기</button>
+          <button type="button" class="btn-secondary" data-id="${esc(r.tempId)}">빼기</button>
         </div>`).join('');
       changes.expenses.forEach(r => delete r._fresh);
     }
@@ -1008,7 +1063,7 @@
     // ── 목록 조작 ─────────────────────────────────
     function onLedgerClick(e) {
       const person = e.target.closest('.lg-person');
-      if (person) { startEditPerson(person.dataset.person); return; }
+      if (person) { requestEditPerson(person.dataset.person); return; }
       const row = e.target.closest('button.lg-row');
       if (!row) return;
       const k = row.dataset.cat;
@@ -1020,13 +1075,13 @@
       const r = e.target.closest('[data-restore]');
       if (r) { restorePerson(r.dataset.restore); return; }
       const b = e.target.closest('.entry-main');
-      if (b) startEditPerson(b.dataset.person);
+      if (b && b.dataset.person) requestEditPerson(b.dataset.person);
     }
     function onExpenseListClick(e) {
       const r = e.target.closest('[data-restore-key]');
       if (r) { changes.deletes = changes.deletes.filter(k => k !== r.dataset.restoreKey); renderDashboard(); toast('삭제를 취소했습니다'); return; }
       const b = e.target.closest('.entry-main');
-      if (b) { const row = expenseRows().find(x => x.ref.key === b.dataset.key); if (row) startEditExpense(row); }
+      if (b) { const row = expenseRows().find(x => x.ref.key === b.dataset.key); if (row) requestEditExpense(row); }
     }
 
     function personRows(person) { return incomeRows().filter(r => personOf(r) === person); }
@@ -1064,34 +1119,69 @@
 
     async function discardAll() {
       const n = countChanges().total; if (!n) return;
-      const r = await ask({ title: `저장하지 않은 변경 ${n}건을 모두 취소할까요?`, tone: 'warn',
-        html: '담아둔 헌금과 지출, 수정·삭제 표시가 모두 사라지고 장부에 저장된 상태로 돌아갑니다.',
-        actions: [{ label: '모두 취소하기', value: true, kind: 'danger' }, { label: '그대로 두기', value: false, kind: 'secondary' }] });
+      const r = await ask({ title: `저장하지 않은 변경 ${n}건을 모두 버릴까요?`, tone: 'warn',
+        html: '목록에 추가한 헌금과 지출, 수정·삭제 표시가 모두 사라지고 장부에 저장된 상태로 돌아갑니다.',
+        actions: [{ label: '모두 버리기', value: true, kind: 'danger' }, { label: '그대로 두기', value: false, kind: 'secondary' }] });
       if (!r) return;
       const snap = snapshot();
       if (editMode) resetForm(editMode.type, true);
       changes = emptyChanges(); clearDraft(currentDate); renderDashboard();
-      undoToast('변경을 모두 취소했습니다', snap);
+      undoToast('저장 전 변경을 모두 버렸습니다', snap);
     }
 
-    // ── 수정 시작 ─────────────────────────────────
+    // ── 수정 시작 (쓰던 입력 보호, 끝나면 원래 화면으로) ───────
+    async function requestEditPerson(person) {
+      if (editMode && editMode.type === 'income' && editMode.person === person) { goPanel(0); return; }
+      if (!(await confirmLeaveForm('income'))) { setSeg('income'); goPanel(0); return; }
+      startEditPerson(person);
+    }
+    async function requestEditExpense(row) {
+      if (editMode && editMode.type === 'expense' && editMode.ref.key === row.ref.key) { goPanel(0); return; }
+      if (!(await confirmLeaveForm('expense'))) { setSeg('expense'); goPanel(0); return; }
+      startEditExpense(row);
+    }
+    function backToOrigin() {
+      const target = lastOrigin;
+      if (target != null && target !== 0 && swipeMode()) {
+        if (document.activeElement) document.activeElement.blur();
+        setTimeout(() => goPanel(target), 250);
+        setTimeout(() => { if (currentPanel() !== target) goPanel(target, false); }, 900);   // 레이아웃 변화로 스크롤이 끊기면 바로 이동
+      }
+      lastOrigin = null;
+    }
+    let lastOrigin = null;
     function startEditPerson(person) {
       const rows = personRows(person).filter(r => r.status !== 'removed');
       if (!rows.length) return;
+      const origin = swipeMode() ? selectedTab() : null;
       if (editMode) resetForm(editMode.type, true);
-      editMode = { type: 'income', person };
+      // 같은 종류를 현금·이체로 나눠 낸 경우 그 종류는 고치지 않고 그대로 둠 (합쳐지지 않게)
+      const modes = {};
+      rows.forEach(r => linesOf(r).forEach(l => { (modes[l.cat] = modes[l.cat] || new Set()).add(l.isTransfer); }));
+      const lockedRowKeys = new Set(rows.filter(r => linesOf(r).some(l => modes[l.cat].size > 1)).map(r => r.ref.key));
+      const locked = new Set();
+      rows.filter(r => lockedRowKeys.has(r.ref.key)).forEach(r => linesOf(r).forEach(l => locked.add(l.cat)));
+      editMode = { type: 'income', person, origin, locked, lockedRowKeys };
       clearErrors('income'); setSeg('income');
       $('envName').value = person === '주정헌금' ? '' : person;
       CAT_KEYS.forEach(k => { $('amt_' + k).value = ''; $('tr_' + k).checked = false; });
       $('envWeeklyCount').value = ''; $('envSpecialName').value = '';
       const sums = {};
-      rows.forEach(r => linesOf(r).forEach(l => {
+      document.querySelectorAll('.line').forEach(el => { el.classList.remove('locked'); const n = el.querySelector('.line-note'); if (n) n.remove(); });
+      rows.filter(r => editMode.lockedRowKeys.has(r.ref.key)).forEach(r => linesOf(r).forEach(l => {
+        const line = document.querySelector(`.line[data-cat="${l.cat}"]`);
+        if (!line.classList.contains('locked')) { line.classList.add('locked'); line.insertAdjacentHTML('beforeend', '<div class="line-note"></div>'); }
+        const note = line.querySelector('.line-note');
+        note.textContent = (note.textContent ? note.textContent + ' · ' : '현금·이체로 나눠 낸 항목이라 그대로 둡니다: ') + `${won(l.amount)}${l.isTransfer ? '(이체)' : '(현금)'}`;
+      }));
+      rows.filter(r => !editMode.lockedRowKeys.has(r.ref.key)).forEach(r => linesOf(r).forEach(l => {
         sums[l.cat] = (sums[l.cat] || 0) + l.amount;
         if (l.isTransfer) $('tr_' + l.cat).checked = true;
         if (l.cat === 'weekly' && r.weeklyCount) $('envWeeklyCount').value = (Number($('envWeeklyCount').value) || 0) + r.weeklyCount;
         if (l.cat === 'special') $('envSpecialName').value = splitName(r.name).special;
       }));
       Object.entries(sums).forEach(([k, v]) => $('amt_' + k).value = won(v));
+      syncTrAll();
       updateFormTotal();
       $('incEditText').textContent = `수정 중: ${person}`;
       $('incEditBanner').classList.add('show');
@@ -1102,8 +1192,9 @@
       setTimeout(() => $('amt_' + (Object.keys(sums)[0] || 'tithe')).focus({ preventScroll: true }), 320);
     }
     function startEditExpense(row) {
+      const origin = swipeMode() ? selectedTab() : null;
       if (editMode) resetForm(editMode.type, true);
-      editMode = { type: 'expense', ref: row.ref, row };
+      editMode = { type: 'expense', ref: row.ref, row, origin };
       clearErrors('expense'); setSeg('expense');
       $('expCategory').value = row.category; $('expAmount').value = won(row.amount);
       $('expEditText').textContent = `수정 중: ${row.category}`;
@@ -1121,17 +1212,19 @@
       if (type === 'income') {
         ['envName', 'envWeeklyCount', 'envSpecialName', ...CAT_KEYS.map(k => 'amt_' + k)].forEach(id => $(id).value = '');
         CAT_KEYS.forEach(k => $('tr_' + k).checked = false);
-        updateFormTotal();
+        $('trAll').checked = false; $('trAll').indeterminate = false;
+        document.querySelectorAll('.line').forEach(el => { el.classList.remove('locked'); const n = el.querySelector('.line-note'); if (n) n.remove(); });
         $('incEditBanner').classList.remove('show'); $('incomeForm').classList.remove('editing');
-        $('btnSaveInc').textContent = '헌금 담기';
+        $('btnSaveInc').textContent = '목록에 추가';
         if (!silent) $('envName').focus({ preventScroll: true });
       } else {
         ['expCategory', 'expAmount'].forEach(id => $(id).value = '');
         $('expEditBanner').classList.remove('show'); $('expenseForm').classList.remove('editing');
-        $('btnSaveExp').textContent = '지출 담기';
+        $('btnSaveExp').textContent = '목록에 추가';
         if (!silent) $('expCategory').focus({ preventScroll: true });
       }
-      if (editMode && editMode.type === type) { editMode = null; if (!silent) renderDashboard(); }
+      if (editMode && editMode.type === type) { lastOrigin = editMode.origin; editMode = null; if (!silent) { renderDashboard(); backToOrigin(); } }
+      if (type === 'income') updateFormTotal();
     }
 
     // ── 헌금 담기 / 수정 반영 ─────────────────────────
@@ -1146,11 +1239,13 @@
       clearErrors('income');
       let person = $('envName').value.trim();
       const amounts = Object.fromEntries(CAT_KEYS.map(k => [k, moneyOf('amt_' + k)]));
-      const cats = CAT_KEYS.filter(k => amounts[k] > 0);
+      const cats = CAT_KEYS.filter(k => amounts[k] > 0 && !lockedCats().has(k));
       const weeklyCount = Number(digits($('envWeeklyCount').value)) || 0;
       const specialName = $('envSpecialName').value.trim();
-      if (!cats.length) return fieldError('income', '헌금 종류 중 한 칸 이상에 금액을 입력해주세요.', 'amt_tithe');
+      const isEditing = editMode && editMode.type === 'income';
+      if (!cats.length && !(isEditing && editMode.locked.size)) return fieldError('income', '헌금 종류 중 한 칸 이상에 금액을 입력해주세요.', 'amt_tithe');
       if (!person && cats.length === 1 && cats[0] === 'weekly') person = '주정헌금';
+      if (!person && isEditing && editMode.person === '주정헌금') person = '주정헌금';
       if (!person) return fieldError('income', '성도 이름을 입력하거나 목록에서 골라주세요.', 'envName');
       if (amounts.weekly > 0 && weeklyCount <= 0) return fieldError('income', '주정헌금을 낸 인원 수를 입력해주세요.', 'envWeeklyCount');
       if (amounts.special > 0 && !specialName) return fieldError('income', '기타 헌금의 헌금명을 입력해주세요. (예: 성탄감사)', 'envSpecialName');
@@ -1158,8 +1253,8 @@
       const isEdit = editMode && editMode.type === 'income';
       if (person !== '주정헌금' && members.length && !members.includes(person) && !(isEdit && person === editMode.person)) {
         const ok = await ask({ title: '성도 명단에 없는 이름입니다', tone: 'warn',
-          html: `<b>${esc(person)}</b> 님은 성도 명단에 없습니다. 이 이름 그대로 담을까요?`,
-          actions: [{ label: '이 이름 그대로 담기', value: true, kind: 'primary' }, { label: '이름 고치기', value: false, kind: 'secondary' }] });
+          html: `<b>${esc(person)}</b> 님은 성도 명단에 없습니다. 이 이름 그대로 추가할까요?`,
+          actions: [{ label: '이 이름 그대로 추가', value: true, kind: 'primary' }, { label: '이름 고치기', value: false, kind: 'secondary' }] });
         if (!ok) { $('envName').focus(); return; }
       }
       const big = cats.filter(k => amounts[k] >= LARGE_AMOUNT);
@@ -1173,7 +1268,7 @@
 
       if (isEdit) {
         // 이 성도의 기존 줄을 새 내용으로 맞추기: 앞에서부터 수정, 남는 줄은 삭제, 모자라면 추가
-        const existing = personRows(editMode.person).filter(r => r.status !== 'removed');
+        const existing = personRows(editMode.person).filter(r => r.status !== 'removed' && !editMode.lockedRowKeys.has(r.ref.key));
         const groupId = newId('g_');
         changes.incomes = changes.incomes.filter(i => !existing.some(r => r.ref.kind === 'new' && r.ref.id === i.tempId));
         const serverRows = existing.filter(r => r.ref.kind === 'server');
@@ -1186,16 +1281,16 @@
         flashKeys = new Set(keys);
         resetForm('income', true);
         renderDashboard();
-        toast(`${person} 님 헌금을 고쳤습니다 (저장 전)`);
-        $('envName').focus({ preventScroll: true });
+        toast(`${person} 님 헌금을 고쳤습니다 (아직 장부에 저장 전)`);
+        backToOrigin();
         return;
       }
 
       const already = persons().find(p => p.person === person && p.status !== 'removed');
       if (already && person !== '주정헌금') {
         const ok = await ask({ title: '이미 입력된 성도입니다', tone: 'warn',
-          html: `<b>${esc(person)}</b> 님 헌금 ${won(already.total)}원이 이미 있습니다.<br>(${detailHtml(already.lines)})<br>여기에 더 담을까요?`,
-          actions: [{ label: '더 담기', value: true, kind: 'primary' }, { label: '취소', value: false, kind: 'secondary' }] });
+          html: `<b>${esc(person)}</b> 님 헌금 ${won(already.total)}원이 이미 있습니다.<br>(${detailHtml(already.lines)})<br>여기에 더 추가할까요?`,
+          actions: [{ label: '더 추가', value: true, kind: 'primary' }, { label: '취소', value: false, kind: 'secondary' }] });
         if (!ok) return;
       }
       const groupId = newId('g_');
@@ -1204,8 +1299,8 @@
       flashKeys = new Set(keys);
       resetForm('income', true);
       renderDashboard();
-      $('srStatus').textContent = `${person} 님 헌금 ${won(newLines.reduce((s, l) => s + l.total, 0))}원을 담았습니다`;
-      $('envName').focus({ preventScroll: true });
+      $('srStatus').textContent = `${person} 님 헌금 ${won(newLines.reduce((s, l) => s + l.total, 0))}원을 목록에 추가했습니다`;
+      showAddedCard('envName');
     }
 
     // ── 지출 담기 / 수정 반영 ─────────────────────────
@@ -1227,22 +1322,22 @@
         } else changes.edits[editMode.ref.key] = { category, amount, rowIndex: editMode.ref.rowIndex };
         flashKeys = new Set([editMode.ref.key]);
         resetForm('expense', true); renderDashboard();
-        toast(`${category} 지출을 고쳤습니다 (저장 전)`);
-        $('expCategory').focus({ preventScroll: true });
+        toast(`${category} 지출을 고쳤습니다 (아직 장부에 저장 전)`);
+        backToOrigin();
         return;
       }
       if (expenseRows().some(r => r.status !== 'removed' && r.category === category && r.amount === amount)) {
         const ok = await ask({ title: '같은 지출이 이미 있습니다', tone: 'warn',
-          html: `${esc(category)} · ${won(amount)}원이 이미 목록에 있습니다. 한 번 더 담을까요?`,
-          actions: [{ label: '한 번 더 담기', value: true, kind: 'primary' }, { label: '취소', value: false, kind: 'secondary' }] });
+          html: `${esc(category)} · ${won(amount)}원이 이미 목록에 있습니다. 한 번 더 추가할까요?`,
+          actions: [{ label: '한 번 더 추가', value: true, kind: 'primary' }, { label: '취소', value: false, kind: 'secondary' }] });
         if (!ok) return;
       }
       const item = { category, amount, tempId: newId('exp_'), _fresh: true };
       changes.expenses.push(item);
       flashKeys = new Set(['new:' + item.tempId]);
       resetForm('expense', true); renderDashboard();
-      $('srStatus').textContent = `${category} ${won(amount)}원을 담았습니다`;
-      $('expCategory').focus({ preventScroll: true });
+      $('srStatus').textContent = `${category} ${won(amount)}원을 목록에 추가했습니다`;
+      showAddedCard('expCategory');
     }
 
     // ── 저장 (장부 마감) ─────────────────────────────
