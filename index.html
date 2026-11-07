@@ -17,26 +17,22 @@
       --paper: #f4f1ea; --sheet: #fffdf8; --sheet-sub: #f8f5ee;
       --rule: #e2dccf; --rule-strong: #c9c1b0;
       --ink: #1d2230; --ink-2: #454c5a; --ink-3: #5b6270;
-      --navy: #1f3d6b; --navy-hover: #172f54; --navy-soft: #e7edf6; --navy-line: #a9bbd6;
+      --navy: #1f3d6b; --navy-hover: #172f54; --navy-soft: #e7edf6;
       --amber: #7a4a00; --amber-soft: #fbf0d9; --amber-line: #dcb36a;
       --red: #b42318; --red-soft: #fbeceb;
       --serif: 'Noto Serif KR', 'Nanum Myeongjo', serif;
       --sans: 'Pretendard', -apple-system, sans-serif;
-      --nav-h: 64px;
+      --nav-h: 64px; --bottom-h: 72px;
     }
-
     * { box-sizing: border-box; }
     ::selection { background: #d5e0f0; color: var(--ink); }
     :focus-visible { outline: 3px solid #6f93c8; outline-offset: 2px; }
-
     body {
       margin: 0; background: var(--paper); color: var(--ink);
       font-family: var(--sans); font-size: 16px; line-height: 1.5;
-      padding-top: calc(var(--nav-h) + 20px);
-      padding-bottom: calc(96px + env(safe-area-inset-bottom));
+      padding-top: calc(var(--nav-h) + 20px); padding-bottom: calc(var(--bottom-h) + 24px);
       -webkit-text-size-adjust: 100%;
     }
-    body.has-pending { padding-bottom: calc(176px + env(safe-area-inset-bottom)); }
     .num { font-variant-numeric: tabular-nums; }
     button { font: inherit; }
 
@@ -46,7 +42,7 @@
       background: var(--sheet); border-bottom: 1px solid var(--rule);
       display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 0 24px;
     }
-    .top-nav .title { margin: 0; font-family: var(--serif); font-size: 20px; font-weight: 800; letter-spacing: -0.01em; white-space: nowrap; color: var(--navy); }
+    .top-nav .title { margin: 0; font-family: var(--serif); font-size: 20px; font-weight: 800; white-space: nowrap; color: var(--navy); }
     .nav-controls { display: flex; align-items: center; gap: 8px; }
     .date-input-nav {
       height: 44px; padding: 0 14px; border: 1px solid var(--rule-strong); border-radius: 8px;
@@ -60,19 +56,16 @@
     .btn-ghost:hover { background: var(--sheet-sub); }
     .flatpickr-calendar { border-radius: 12px !important; box-shadow: 0 12px 32px rgba(29,34,48,0.14) !important; font-family: var(--sans); }
     .flatpickr-day.selected { background: var(--navy) !important; border-color: var(--navy) !important; color: #fff !important; }
+    .panel-tabs { display: none; }
 
-    .mobile-tabs { display: none; }
-
-    /* ── 장부 지면 ── */
-    .grid-container { display: flex; gap: 20px; padding: 0 20px; max-width: 1320px; margin: 0 auto; align-items: flex-start; }
-    .column { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 20px; }
-    .column[data-col="0"] { flex: 1.15; }
-    @media (min-width: 761px) { .column[data-col="1"] { position: sticky; top: calc(var(--nav-h) + 20px); max-height: calc(100vh - var(--nav-h) - 130px); overflow-y: auto; overscroll-behavior: contain; } body.has-pending .column[data-col="1"] { max-height: calc(100vh - var(--nav-h) - 210px); } }
-
-    .sheet {
-      background: var(--sheet); border: 1px solid var(--rule); border-radius: 6px; padding: 22px 24px;
-      box-shadow: 0 1px 2px rgba(29,34,48,0.04), 0 6px 20px rgba(29,34,48,0.04);
+    /* ── 3열 (PC) : 입력 | 헌금 | 지출 ── */
+    .panels { display: grid; grid-template-columns: minmax(360px, 0.95fr) minmax(0, 1.2fr) minmax(0, 0.9fr); gap: 20px; padding: 0 20px; max-width: 1480px; margin: 0 auto; align-items: start; }
+    .panel { min-width: 0; display: flex; flex-direction: column; gap: 20px; }
+    @media (min-width: 1000px) {
+      .panel[data-panel="0"] { position: sticky; top: calc(var(--nav-h) + 20px); max-height: calc(100vh - var(--nav-h) - var(--bottom-h) - 40px); overflow-y: auto; overscroll-behavior: contain; border-radius: 6px; }
     }
+
+    .sheet { background: var(--sheet); border: 1px solid var(--rule); border-radius: 6px; padding: 20px 22px; box-shadow: 0 1px 2px rgba(29,34,48,0.04), 0 6px 20px rgba(29,34,48,0.04); }
     .sheet-title {
       margin: 0 0 16px; padding-bottom: 10px; border-bottom: 1px solid var(--rule-strong);
       font-family: var(--serif); font-size: 20px; font-weight: 800; color: var(--ink);
@@ -80,7 +73,12 @@
     }
     .sheet-title small { font-family: var(--sans); font-size: 14px; font-weight: 600; color: var(--ink-3); }
 
-    /* ── 입력 폼 ── */
+    /* 입력 화면: 헌금 입력 / 지출 입력 전환 */
+    .seg { display: flex; gap: 4px; padding: 3px; background: var(--sheet-sub); border: 1px solid var(--rule); border-radius: 8px; margin-bottom: 18px; }
+    .seg button { flex: 1; height: 44px; border: none; border-radius: 6px; background: transparent; font-size: 16px; font-weight: 700; color: var(--ink-2); cursor: pointer; }
+    .seg button[aria-pressed="true"] { background: var(--navy); color: #fff; }
+    .seg-pane[hidden] { display: none; }
+
     .edit-banner {
       display: none; align-items: center; justify-content: space-between; gap: 12px;
       background: var(--amber-soft); color: var(--amber); border: 1px solid var(--amber-line); border-radius: 8px;
@@ -88,130 +86,126 @@
     }
     .edit-banner.show { display: flex; }
 
-    .field-row { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 14px; }
-    .field { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 160px; }
-    .field > label, .field-label { font-size: 14px; font-weight: 700; color: var(--ink-2); }
-    input.inp, select.inp {
+    .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+    .field > label { font-size: 14px; font-weight: 700; color: var(--ink-2); }
+    input.inp {
       height: 50px; padding: 0 14px; border: 1px solid var(--rule-strong); border-radius: 8px; width: 100%;
       font-family: var(--sans); font-size: 17px; color: var(--ink); background: #fff;
     }
     input.inp::placeholder { color: #6a707c; font-weight: 400; }
-    input.inp:focus, select.inp:focus { outline: none; border-color: var(--navy); box-shadow: 0 0 0 3px #d5e0f0; }
+    input.inp:focus { outline: none; border-color: var(--navy); box-shadow: 0 0 0 3px #d5e0f0; }
     input.inp[aria-invalid="true"] { border-color: var(--red); box-shadow: 0 0 0 3px #f6d5d2; }
     form.editing input.inp { background: #fffaf0; }
+    .money-wrap { position: relative; flex: 1; min-width: 0; }
+    .money-wrap input { text-align: right; padding-right: 34px; font-size: 18px; font-weight: 700; }
+    .money-wrap span { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--ink-3); font-weight: 600; pointer-events: none; }
 
-    .check-field {
-      display: inline-flex; align-items: center; gap: 8px; height: 50px; padding: 0 16px;
-      border: 1px solid var(--rule-strong); border-radius: 8px; background: #fff;
-      font-size: 17px; font-weight: 700; cursor: pointer; user-select: none; white-space: nowrap;
+    /* 헌금 종류별 금액 + 종류별 이체 */
+    .lines { border-top: 1px solid var(--rule-strong); border-bottom: 1px solid var(--rule-strong); }
+    .lines-head { display: grid; grid-template-columns: 76px 1fr 64px; gap: 8px; padding: 8px 2px; border-bottom: 1px solid var(--rule); font-size: 14px; font-weight: 700; color: var(--ink-3); }
+    .lines-head span:last-child { text-align: center; }
+    .line { display: grid; grid-template-columns: 76px 1fr 64px; gap: 8px; align-items: center; padding: 6px 2px; border-bottom: 1px solid var(--rule); }
+    .line:last-child { border-bottom: none; }
+    .line > label { font-size: 16px; font-weight: 700; }
+    .line .money-wrap input { height: 46px; }
+    .line .pair { display: flex; gap: 6px; min-width: 0; }
+    .line .pair .count { flex: 0 0 64px; }
+    .line .pair .count input { height: 46px; padding: 0 8px; font-size: 16px; text-align: center; }
+    .line .stack { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+    .line .stack > input { height: 44px; font-size: 16px; }
+    .tr {
+      display: flex; align-items: center; justify-content: center; gap: 4px; height: 46px; border: 1px solid var(--rule-strong);
+      border-radius: 8px; background: #fff; cursor: pointer; font-size: 14px; font-weight: 700; color: var(--ink-2); user-select: none;
     }
-    .check-field input { width: 22px; height: 22px; margin: 0; accent-color: var(--navy); }
-    .check-field:has(input:checked) { border-color: var(--navy); background: var(--navy-soft); color: var(--navy); }
-
-    /* 봉투: 헌금 종류별 금액 칸 (장부 줄) */
-    .envelope { border-top: 1px solid var(--rule-strong); border-bottom: 1px solid var(--rule-strong); }
-    .env-head { display: flex; justify-content: space-between; align-items: center; padding: 10px 4px; border-bottom: 1px solid var(--rule); font-size: 14px; font-weight: 700; color: var(--ink-2); }
-    .env-lines { display: grid; grid-template-columns: 1fr 1fr; }
-    .env-line { display: flex; align-items: center; gap: 10px; padding: 6px 10px 6px 4px; border-bottom: 1px solid var(--rule); min-height: 60px; }
-    .env-line:nth-child(odd) { border-right: 1px solid var(--rule); }
-    .env-line > label { flex: 0 0 72px; font-size: 16px; font-weight: 700; color: var(--ink); }
-    .env-line .money-wrap { position: relative; flex: 1; min-width: 0; }
-    .env-line .money-wrap input { height: 46px; text-align: right; padding-right: 34px; font-size: 18px; font-weight: 700; }
-    .env-line .money-wrap span { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--ink-3); font-weight: 600; }
-    .env-line .sub { flex: 0 0 76px; }
-    .env-line .sub input { height: 46px; padding: 0 10px; font-size: 16px; }
-    .env-line.wide { grid-column: 1 / -1; border-right: none; }
-    .env-foot {
-      display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 14px;
-      border-top: 3px double var(--rule-strong);
-    }
-    .env-total-label { font-size: 15px; font-weight: 700; color: var(--ink-2); }
-    .env-total { font-family: var(--serif); font-size: 24px; font-weight: 800; color: var(--navy); }
+    .tr input { width: 18px; height: 18px; margin: 0; accent-color: var(--navy); }
+    .tr:has(input:checked) { border-color: var(--navy); background: var(--navy-soft); color: var(--navy); }
+    .line.has-amount > label { color: var(--navy); }
+    .line-total { display: flex; justify-content: space-between; align-items: baseline; padding: 12px 2px; border-top: 3px double var(--rule-strong); }
+    .line-total span:first-child { font-size: 15px; font-weight: 700; color: var(--ink-2); }
+    .line-total .val { font-family: var(--serif); font-size: 24px; font-weight: 800; color: var(--navy); }
+    .line-total small { display: block; font-family: var(--sans); font-size: 14px; font-weight: 600; color: var(--ink-3); text-align: right; }
 
     .form-error { display: none; margin-top: 10px; color: var(--red); font-size: 15px; font-weight: 700; }
     .form-error.show { display: block; }
-
-    .form-actions { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+    .form-actions { display: flex; align-items: center; gap: 10px; margin-top: 14px; }
     .form-actions .spacer { flex: 1; }
-    .btn-primary {
-      height: 54px; padding: 0 26px; border: none; border-radius: 8px; background: var(--navy); color: #fff;
-      font-size: 17px; font-weight: 800; cursor: pointer; white-space: nowrap;
-    }
+    .btn-primary { height: 54px; padding: 0 26px; border: none; border-radius: 8px; background: var(--navy); color: #fff; font-size: 17px; font-weight: 800; cursor: pointer; white-space: nowrap; }
     .btn-primary:hover { background: var(--navy-hover); }
     .btn-primary:disabled { background: #8597b3; cursor: wait; }
-    .btn-secondary {
-      height: 44px; padding: 0 16px; border: 1px solid var(--rule-strong); border-radius: 8px; background: #fff;
-      color: var(--ink); font-size: 15px; font-weight: 700; cursor: pointer; white-space: nowrap;
-    }
+    .btn-secondary { height: 44px; padding: 0 16px; border: 1px solid var(--rule-strong); border-radius: 8px; background: #fff; color: var(--ink); font-size: 15px; font-weight: 700; cursor: pointer; white-space: nowrap; }
     .btn-secondary:hover { background: var(--sheet-sub); }
-    .btn-danger-text {
-      height: 44px; padding: 0 14px; border: 1px solid transparent; border-radius: 8px; background: transparent;
-      color: var(--red); font-size: 15px; font-weight: 700; cursor: pointer; display: none;
-    }
+    .btn-danger-text { height: 44px; padding: 0 14px; border: 1px solid transparent; border-radius: 8px; background: transparent; color: var(--red); font-size: 15px; font-weight: 700; cursor: pointer; display: none; }
     .btn-danger-text:hover { background: var(--red-soft); border-color: #f0c4c0; }
     form.editing .btn-danger-text { display: inline-flex; align-items: center; }
 
-    /* 방금 담은 내역 (입력 자리에서 바로 확인) */
     .recent { margin-top: 16px; border-top: 1px dashed var(--rule-strong); padding-top: 12px; display: none; }
     .recent.show { display: block; }
-    .recent-title { font-size: 14px; font-weight: 700; color: var(--ink-3); margin-bottom: 6px; }
-    .recent-row { display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 2px 0; }
+    .recent-title { font-size: 14px; font-weight: 700; color: var(--ink-3); margin-bottom: 4px; }
+    .recent-row { display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 4px 0; }
     .recent-row + .recent-row { border-top: 1px solid var(--rule); }
-    .recent-row .r-name { font-weight: 700; flex: 1; min-width: 0; overflow-wrap: anywhere; }
+    .recent-row .r-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+    .recent-row .r-name { font-weight: 700; }
+    .recent-row .r-detail { font-size: 14px; color: var(--ink-2); overflow-wrap: anywhere; }
     .recent-row .r-amt { font-weight: 800; white-space: nowrap; }
-    .recent-row.flash { animation: flash 1.6s cubic-bezier(0.16, 1, 0.3, 1); }
+    .flash { animation: flash 1.6s cubic-bezier(0.16, 1, 0.3, 1); }
     @keyframes flash { from { background: #fbe9b7; } to { background: transparent; } }
 
-    /* ── 장부 요약표 ── */
-    .ledger-table { width: 100%; border-collapse: collapse; font-size: 16px; }
-    .ledger-table th, .ledger-table td { padding: 9px 6px; border-bottom: 1px solid var(--rule); text-align: right; white-space: nowrap; }
-    .ledger-table th:first-child, .ledger-table td:first-child { text-align: left; }
-    .ledger-table thead th { font-size: 14px; font-weight: 700; color: var(--ink-3); border-bottom: 1px solid var(--rule-strong); }
-    .ledger-table tbody td:first-child { font-weight: 700; }
-    .ledger-table td.muted { color: var(--ink-3); }
-    .ledger-table tfoot td { border-top: 3px double var(--ink-2); border-bottom: none; font-weight: 800; font-size: 17px; }
-    .ledger-table tfoot td.grand { font-family: var(--serif); font-size: 20px; color: var(--navy); }
-    .ledger-wrap { overflow-x: auto; margin-bottom: 18px; }
+    /* ── 헌금 종류별 장부 (누르면 세부) ── */
+    .ledger { margin-bottom: 20px; }
+    .lg-split { display: none; justify-content: flex-end; gap: 12px; padding: 2px 4px 0; font-size: 15px; color: var(--ink-2); }
+    .lg-row { display: grid; grid-template-columns: 1.3fr 0.7fr 1fr 1fr 1.1fr; gap: 6px; align-items: center; padding: 0 4px; }
+    .lg-row > * { text-align: right; white-space: nowrap; }
+    .lg-row > :first-child { text-align: left; }
+    .lg-head { font-size: 14px; font-weight: 700; color: var(--ink-3); padding-top: 8px; padding-bottom: 8px; border-bottom: 1px solid var(--rule-strong); }
+    button.lg-row { width: 100%; min-height: 52px; border: none; border-bottom: 1px solid var(--rule); background: transparent; color: var(--ink); cursor: pointer; font-size: 16px; }
+    button.lg-row:hover { background: var(--sheet-sub); }
+    button.lg-row[aria-expanded="true"] { background: var(--navy-soft); border-bottom-color: transparent; }
+    .lg-name { font-weight: 700; display: inline-flex; align-items: center; gap: 6px; }
+    .lg-name svg { transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1); color: var(--ink-3); flex-shrink: 0; }
+    button.lg-row[aria-expanded="true"] .lg-name svg { transform: rotate(90deg); color: var(--navy); }
+    .lg-count { color: var(--ink-3); }
+    .lg-sum { font-weight: 800; }
+    .lg-detail { background: var(--navy-soft); border-bottom: 1px solid var(--rule); padding: 2px 10px 8px 26px; }
+    .lg-detail[hidden] { display: none; }
+    .lg-person { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 46px; border: none; border-top: 1px solid #d7e0ee; background: transparent; padding: 0 2px; cursor: pointer; color: var(--ink); text-align: left; font-size: 16px; }
+    .lg-person:first-child { border-top: none; }
+    .lg-person:hover { background: rgba(255,255,255,0.6); }
+    .lg-person .p-name { flex: 1; min-width: 0; font-weight: 600; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .lg-person .p-amt { font-weight: 800; white-space: nowrap; }
+    .lg-person.is-removed .p-name > span:first-child, .lg-person.is-removed .p-amt { text-decoration: line-through; color: var(--ink-3); }
+    .lg-foot { font-weight: 800; border-top: 3px double var(--ink-2); padding-top: 10px; padding-bottom: 6px; font-size: 16px; }
+    .lg-foot .grand { font-family: var(--serif); font-size: 20px; color: var(--navy); }
 
-    /* ── 내역 줄 (누르면 수정) ── */
+    /* ── 사람별 / 지출 목록 (누르면 수정) ── */
     .list-head { display: flex; justify-content: space-between; align-items: baseline; font-size: 14px; font-weight: 700; color: var(--ink-3); padding: 0 2px 6px; border-bottom: 1px solid var(--rule-strong); }
     .entry { display: flex; align-items: stretch; border-bottom: 1px solid var(--rule); }
-    .entry-main {
-      flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px; text-align: left;
-      background: transparent; border: none; padding: 10px 4px; min-height: 60px; cursor: pointer; color: var(--ink);
-    }
+    .entry-main { flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px; text-align: left; background: transparent; border: none; padding: 10px 4px; min-height: 60px; cursor: pointer; color: var(--ink); }
     .entry-main:hover { background: var(--sheet-sub); }
     .entry-main:disabled { cursor: default; background: transparent; }
     .entry-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
     .entry-name { font-size: 17px; font-weight: 700; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; overflow-wrap: anywhere; }
     .entry-detail { font-size: 15px; color: var(--ink-2); overflow-wrap: anywhere; }
+    .entry-detail .trn { color: var(--navy); font-weight: 700; }
     .entry-total { font-size: 18px; font-weight: 800; white-space: nowrap; }
     .entry-chev { color: var(--ink-3); flex-shrink: 0; }
     .entry.is-editing .entry-main { background: var(--amber-soft); box-shadow: inset 3px 0 0 var(--amber-line); }
     .entry.is-removed .entry-name > span:first-child, .entry.is-removed .entry-total, .entry.is-removed .entry-detail { text-decoration: line-through; color: var(--ink-3); }
-    .entry.flash { animation: flash 1.6s cubic-bezier(0.16, 1, 0.3, 1); }
     .entry-restore { align-self: center; margin-left: 8px; }
-
     .tag { font-size: 14px; font-weight: 700; padding: 1px 8px; border-radius: 4px; white-space: nowrap; line-height: 1.5; }
     .tag.transfer { background: var(--navy-soft); color: var(--navy); }
     .tag.pending { background: var(--amber-soft); color: var(--amber); }
     .tag.removed { background: var(--red-soft); color: var(--red); }
-
     .empty { text-align: center; color: var(--ink-3); padding: 28px 12px; font-size: 16px; }
+    .exp-total { display: flex; justify-content: space-between; align-items: baseline; padding: 12px 4px 4px; border-top: 3px double var(--ink-2); margin-top: -1px; font-weight: 800; }
+    .exp-total .grand { font-family: var(--serif); font-size: 20px; color: var(--navy); }
 
     /* ── 하단: 저장 대기 + 잔고 ── */
     .bottom-stack { position: fixed; inset: auto 0 0 0; z-index: 1000; }
-    .pending-bar {
-      display: none; align-items: center; gap: 12px; padding: 10px 20px;
-      background: var(--sheet); border-top: 2px solid var(--amber-line); box-shadow: 0 -6px 18px rgba(29,34,48,0.08);
-    }
+    .pending-bar { display: none; align-items: center; gap: 12px; padding: 10px 20px; background: var(--sheet); border-top: 2px solid var(--amber-line); box-shadow: 0 -6px 18px rgba(29,34,48,0.08); }
     body.has-pending .pending-bar { display: flex; }
     .pending-text { flex: 1; min-width: 0; font-size: 16px; font-weight: 800; line-height: 1.35; }
     .pending-text small { display: block; font-size: 14px; font-weight: 600; color: var(--amber); }
-    .bottom-bar {
-      background: var(--navy); color: #fff; padding: 14px 20px calc(14px + env(safe-area-inset-bottom));
-      display: flex; justify-content: center; align-items: baseline; flex-wrap: wrap; column-gap: 28px; row-gap: 2px;
-    }
+    .bottom-bar { background: var(--navy); color: #fff; padding: 14px 20px calc(14px + env(safe-area-inset-bottom)); display: flex; justify-content: center; align-items: baseline; flex-wrap: wrap; column-gap: 28px; row-gap: 2px; }
     .bal { display: flex; align-items: baseline; gap: 8px; white-space: nowrap; }
     .bal-label { font-size: 15px; color: #c9d4e6; font-weight: 600; }
     .bal-val { font-family: var(--serif); font-size: 22px; font-weight: 800; }
@@ -219,11 +213,8 @@
     #balanceGroup.pending .bal-label { color: #ffd88a; }
     #txtBalance.negative { color: #ffb4ab; }
 
-    /* ── 대화창 (앱 자체 디자인) ── */
-    dialog.dlg {
-      border: none; padding: 0; border-radius: 10px; width: min(92vw, 460px); color: var(--ink);
-      background: var(--sheet); box-shadow: 0 24px 64px rgba(15,20,32,0.28);
-    }
+    /* ── 대화창 / 알림 ── */
+    dialog.dlg { border: none; padding: 0; border-radius: 10px; width: min(92vw, 460px); color: var(--ink); background: var(--sheet); box-shadow: 0 24px 64px rgba(15,20,32,0.28); }
     dialog.dlg::backdrop { background: rgba(20,26,40,0.45); }
     dialog.dlg[open] { animation: dlgIn 0.28s cubic-bezier(0.16, 1, 0.3, 1); }
     @keyframes dlgIn { from { opacity: 0; transform: translateY(8px) scale(0.985); } to { opacity: 1; transform: none; } }
@@ -244,42 +235,39 @@
     .close-table td { padding: 8px 2px; border-bottom: 1px solid var(--rule); }
     .close-table td:last-child { text-align: right; font-weight: 800; }
     .close-table tr.grand td { border-top: 3px double var(--ink-2); border-bottom: none; font-family: var(--serif); font-size: 22px; color: var(--navy); padding-top: 12px; }
-
-    /* 알림 (되돌리기 버튼 포함) */
     .toast {
       position: fixed; left: 50%; top: calc(var(--nav-h) + 12px); transform: translate(-50%, -8px); z-index: 1100;
       display: flex; align-items: center; gap: 12px; max-width: min(92vw, 520px);
-      background: var(--ink); color: #fff; border-radius: 8px; padding: 8px 8px 8px 16px;
-      font-size: 16px; font-weight: 600; box-shadow: 0 10px 28px rgba(15,20,32,0.25);
-      opacity: 0; pointer-events: none; transition: opacity 0.2s ease, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      background: var(--ink); color: #fff; border-radius: 8px; padding: 8px 8px 8px 16px; font-size: 16px; font-weight: 600;
+      box-shadow: 0 10px 28px rgba(15,20,32,0.25); opacity: 0; pointer-events: none;
+      transition: opacity 0.2s ease, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .toast.show { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
     .toast button { height: 40px; padding: 0 14px; border: 1px solid #5b6578; border-radius: 6px; background: transparent; color: #ffe3a3; font-weight: 800; cursor: pointer; white-space: nowrap; }
     .toast .t-msg { padding: 8px 0; }
-
     .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
     .print-only { display: none; }
 
-    /* ── 모바일 ── */
-    @media (max-width: 760px) {
+    /* ── 모바일·태블릿: 3화면 스와이프 (입력 ← 헌금 → 지출) ── */
+    @media (max-width: 999px) {
       :root { --nav-h: 116px; }
-      body { padding-top: calc(var(--nav-h) + 12px); }
+      body { padding: var(--nav-h) 0 0; overflow: hidden; height: 100dvh; }
       .top-nav { flex-wrap: wrap; align-content: center; padding: 8px 12px; row-gap: 8px; }
       .top-nav .title { font-size: 20px; flex: 1; }
       .date-input-nav { width: 140px; font-size: 15px; padding: 0 8px; }
       .btn-ghost { padding: 0 12px; }
-      .mobile-tabs { display: flex; width: 100%; gap: 4px; padding: 3px; background: var(--sheet-sub); border: 1px solid var(--rule); border-radius: 8px; }
-      .mobile-tabs button { flex: 1; height: 44px; border: none; border-radius: 6px; background: transparent; font-size: 16px; font-weight: 700; color: var(--ink-2); cursor: pointer; }
-      .mobile-tabs button[aria-selected="true"] { background: var(--sheet); color: var(--navy); box-shadow: 0 1px 3px rgba(29,34,48,0.14); }
-      .mobile-tabs .tab-count { color: var(--amber); }
-
-      .grid-container { display: block; padding: 0 10px; }
-      .column { display: none; }
-      .column.active { display: flex; }
+      .panel-tabs { display: flex; width: 100%; gap: 4px; padding: 3px; background: var(--sheet-sub); border: 1px solid var(--rule); border-radius: 8px; }
+      .panel-tabs button { flex: 1; height: 44px; border: none; border-radius: 6px; background: transparent; font-size: 16px; font-weight: 700; color: var(--ink-2); cursor: pointer; }
+      .panel-tabs button[aria-selected="true"] { background: var(--sheet); color: var(--navy); box-shadow: 0 1px 3px rgba(29,34,48,0.14); }
+      .panel-tabs .tab-count { color: var(--amber); }
+      .panels {
+        display: flex; gap: 0; padding: 0; max-width: none; align-items: stretch;
+        height: calc(100dvh - var(--nav-h) - var(--bottom-h));
+        overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-x: contain;
+      }
+      .panels::-webkit-scrollbar { display: none; }
+      .panel { flex: 0 0 100%; scroll-snap-align: start; scroll-snap-stop: always; overflow-y: auto; overscroll-behavior-y: contain; padding: 12px 10px 24px; gap: 12px; }
       .sheet { padding: 16px 14px; }
-      .env-lines { grid-template-columns: 1fr; }
-      .env-line:nth-child(odd) { border-right: none; }
-      .env-line > label { flex-basis: 70px; }
       .pending-bar { padding: 10px 12px; }
       .bottom-bar { column-gap: 18px; padding-left: 12px; padding-right: 12px; }
       .bal-val { font-size: 20px; }
@@ -287,28 +275,29 @@
       .wide-only { display: none; }
       .pending-bar .btn-secondary { padding: 0 12px; }
     }
+    @media (max-width: 600px) { .lg-row { grid-template-columns: 1.4fr 0.7fr 1.3fr; } .lg-row > :nth-child(3), .lg-row > :nth-child(4) { display: none; } .lg-split { display: flex; } }
     @media (max-width: 420px) { .title-church { display: none; } }
     @media (max-width: 360px) {
       .bottom-bar { flex-direction: column; align-items: center; }
-      .pending-bar { flex-wrap: wrap; }
-      .pending-text { flex-basis: 100%; }
-      .pending-bar .btn-primary { flex: 1; }
-      .ledger-table { font-size: 15px; }
+      .pending-bar { flex-wrap: wrap; } .pending-text { flex-basis: 100%; } .pending-bar .btn-primary { flex: 1; }
+      .lines-head, .line { grid-template-columns: 68px 1fr 58px; gap: 6px; }
+      .lg-row { font-size: 14px; }
     }
 
     /* ── 출력 (재정보고) ── */
     @media print {
       @page { size: A4; margin: 14mm; }
-      body { padding: 0 !important; background: #fff !important; color: #000 !important; font-size: 11pt; }
-      .top-nav, .input-sheet, .bottom-stack, .mobile-tabs, .entry-chev, .entry-restore, #global-loader, .flatpickr-calendar, .tag.pending, .tag.removed, dialog, .toast, .list-head .screen-only { display: none !important; }
-      .grid-container { display: flex !important; gap: 8mm !important; padding: 0 !important; max-width: none !important; }
-      .column { display: flex !important; }
+      body { padding: 0 !important; background: #fff !important; color: #000 !important; font-size: 11pt; overflow: visible !important; height: auto !important; }
+      .top-nav, .panel[data-panel="0"], .bottom-stack, .panel-tabs, .entry-chev, .entry-restore, #global-loader, .flatpickr-calendar, .tag.pending, .tag.removed, dialog, .toast, .list-head .screen-only, .lg-detail, .lg-name svg { display: none !important; }
+      .panels { display: grid !important; grid-template-columns: 1.2fr 0.9fr !important; gap: 8mm !important; padding: 0 !important; height: auto !important; overflow: visible !important; max-width: none !important; }
+      .panel { position: static !important; max-height: none !important; overflow: visible !important; padding: 0 !important; }
       .sheet { border: none !important; box-shadow: none !important; padding: 0 !important; background: none !important; }
       .sheet-title { font-size: 13pt; border-bottom: 1.5pt solid #000; color: #000; }
-      .ledger-table, .ledger-table * { color: #000 !important; }
-      .ledger-table tfoot td { border-top: 2.5pt double #000; }
+      .ledger *, .exp-total * { color: #000 !important; }
+      button.lg-row { min-height: 0; padding-top: 4pt; padding-bottom: 4pt; background: none !important; font-size: 11pt; }
+      .lg-foot { border-top: 2.5pt double #000; }
       .entry-main { min-height: 0; padding: 3pt 0; }
-      .entry-name { font-size: 11pt; } .entry-detail { font-size: 10pt; color: #000; } .entry-total { font-size: 11pt; }
+      .entry-name { font-size: 11pt; } .entry-detail { font-size: 10pt; color: #000; } .entry-detail .trn { color: #000; } .entry-total { font-size: 11pt; }
       .entry { break-inside: avoid; }
       .tag { background: none !important; border: 0.75pt solid #000; color: #000 !important; font-size: 8.5pt; }
       .print-only { display: block !important; }
@@ -375,7 +364,7 @@
       .loader-progress { width: 170px; }
     }
     @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+      *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
     }
   </style>
 </head>
@@ -401,9 +390,10 @@
         출력
       </button>
     </div>
-    <div class="mobile-tabs" role="tablist" aria-label="입력 화면 선택">
-      <button type="button" role="tab" aria-selected="true" data-tab="0">헌금 <span class="tab-count" id="tabCountInc"></span></button>
-      <button type="button" role="tab" aria-selected="false" data-tab="1">지출 <span class="tab-count" id="tabCountExp"></span></button>
+    <div class="panel-tabs" role="tablist" aria-label="화면 선택">
+      <button type="button" role="tab" aria-selected="false" data-tab="0">입력</button>
+      <button type="button" role="tab" aria-selected="true" data-tab="1">헌금 <span class="tab-count" id="tabCountInc"></span></button>
+      <button type="button" role="tab" aria-selected="false" data-tab="2">지출 <span class="tab-count" id="tabCountExp"></span></button>
     </div>
   </header>
 
@@ -420,105 +410,95 @@
     </div>
   </div>
 
-  <main class="grid-container">
-    <!-- ── 헌금 ── -->
-    <section class="column active" data-col="0">
-      <div class="sheet input-sheet">
-        <h2 class="sheet-title">헌금 봉투 입력 <small>봉투 한 장씩 입력하세요</small></h2>
-        <form id="incomeForm" autocomplete="off" novalidate>
-          <div class="edit-banner" id="incEditBanner" role="status">
-            <span id="incEditText"></span>
-            <button type="button" class="btn-secondary" data-action="cancel-edit" data-type="income">수정 취소</button>
-          </div>
+  <main class="panels" id="panels">
+    <!-- ── 1. 입력 ── -->
+    <section class="panel" data-panel="0" aria-label="입력">
+      <div class="sheet">
+        <div class="seg" role="group" aria-label="입력 종류">
+          <button type="button" data-seg="income" aria-pressed="true">헌금 입력</button>
+          <button type="button" data-seg="expense" aria-pressed="false">지출 입력</button>
+        </div>
 
-          <div class="field-row">
+        <div class="seg-pane" id="paneIncome">
+          <form id="incomeForm" autocomplete="off" novalidate>
+            <div class="edit-banner" id="incEditBanner" role="status">
+              <span id="incEditText"></span>
+              <button type="button" class="btn-secondary" data-action="cancel-edit" data-type="income">수정 취소</button>
+            </div>
             <div class="field">
               <label for="envName">성도 이름</label>
               <input class="inp" type="text" id="envName" list="memberList" placeholder="이름 입력 또는 목록에서 선택">
               <datalist id="memberList"></datalist>
             </div>
-            <label class="check-field"><input type="checkbox" id="envTransfer"> 계좌이체</label>
-          </div>
-
-          <div class="envelope">
-            <div class="env-head"><span>헌금 종류별 금액</span><span>원</span></div>
-            <div class="env-lines">
-              <div class="env-line"><label for="amt_tithe">십일조</label><div class="money-wrap"><input class="inp money num" id="amt_tithe" data-cat="tithe" inputmode="numeric" placeholder="—"><span>원</span></div></div>
-              <div class="env-line"><label for="amt_thanks">감사헌금</label><div class="money-wrap"><input class="inp money num" id="amt_thanks" data-cat="thanks" inputmode="numeric" placeholder="—"><span>원</span></div></div>
-              <div class="env-line"><label for="amt_mission">선교헌금</label><div class="money-wrap"><input class="inp money num" id="amt_mission" data-cat="mission" inputmode="numeric" placeholder="—"><span>원</span></div></div>
-              <div class="env-line"><label for="amt_building">건축헌금</label><div class="money-wrap"><input class="inp money num" id="amt_building" data-cat="building" inputmode="numeric" placeholder="—"><span>원</span></div></div>
-              <div class="env-line"><label for="amt_thousand">일천번제</label><div class="money-wrap"><input class="inp money num" id="amt_thousand" data-cat="thousand" inputmode="numeric" placeholder="—"><span>원</span></div></div>
-              <div class="env-line"><label for="amt_weekly">주정헌금</label>
-                <div class="sub"><input class="inp num" id="envWeeklyCount" inputmode="numeric" placeholder="인원" aria-label="주정헌금 인원"></div>
-                <div class="money-wrap"><input class="inp money num" id="amt_weekly" data-cat="weekly" inputmode="numeric" placeholder="—"><span>원</span></div></div>
-              <div class="env-line wide"><label for="amt_special">기타 헌금</label>
-                <div class="field" style="min-width:0;flex:1.2"><input class="inp" id="envSpecialName" placeholder="헌금명 (예: 성탄감사)" aria-label="기타 헌금명"></div>
-                <div class="money-wrap"><input class="inp money num" id="amt_special" data-cat="special" inputmode="numeric" placeholder="—"><span>원</span></div></div>
+            <div class="lines">
+              <div class="lines-head"><span>헌금 종류</span><span>금액</span><span>계좌이체</span></div>
+              <div class="line" data-cat="tithe"><label for="amt_tithe">십일조</label><div class="money-wrap"><input class="inp money num" id="amt_tithe" inputmode="numeric" placeholder="—"><span>원</span></div><label class="tr"><input type="checkbox" id="tr_tithe" aria-label="십일조 계좌이체">이체</label></div>
+              <div class="line" data-cat="thanks"><label for="amt_thanks">감사헌금</label><div class="money-wrap"><input class="inp money num" id="amt_thanks" inputmode="numeric" placeholder="—"><span>원</span></div><label class="tr"><input type="checkbox" id="tr_thanks" aria-label="감사헌금 계좌이체">이체</label></div>
+              <div class="line" data-cat="mission"><label for="amt_mission">선교헌금</label><div class="money-wrap"><input class="inp money num" id="amt_mission" inputmode="numeric" placeholder="—"><span>원</span></div><label class="tr"><input type="checkbox" id="tr_mission" aria-label="선교헌금 계좌이체">이체</label></div>
+              <div class="line" data-cat="building"><label for="amt_building">건축헌금</label><div class="money-wrap"><input class="inp money num" id="amt_building" inputmode="numeric" placeholder="—"><span>원</span></div><label class="tr"><input type="checkbox" id="tr_building" aria-label="건축헌금 계좌이체">이체</label></div>
+              <div class="line" data-cat="thousand"><label for="amt_thousand">일천번제</label><div class="money-wrap"><input class="inp money num" id="amt_thousand" inputmode="numeric" placeholder="—"><span>원</span></div><label class="tr"><input type="checkbox" id="tr_thousand" aria-label="일천번제 계좌이체">이체</label></div>
+              <div class="line" data-cat="weekly"><label for="amt_weekly">주정헌금</label>
+                <div class="pair"><div class="count"><input class="inp num" id="envWeeklyCount" inputmode="numeric" placeholder="인원" aria-label="주정헌금 인원"></div><div class="money-wrap"><input class="inp money num" id="amt_weekly" inputmode="numeric" placeholder="—"><span>원</span></div></div>
+                <label class="tr"><input type="checkbox" id="tr_weekly" aria-label="주정헌금 계좌이체">이체</label></div>
+              <div class="line" data-cat="special"><label for="amt_special">기타 헌금</label>
+                <div class="stack"><input class="inp" id="envSpecialName" placeholder="헌금명 (예: 성탄감사)" aria-label="기타 헌금명"><div class="money-wrap"><input class="inp money num" id="amt_special" inputmode="numeric" placeholder="—"><span>원</span></div></div>
+                <label class="tr"><input type="checkbox" id="tr_special" aria-label="기타 헌금 계좌이체">이체</label></div>
             </div>
-            <div class="env-foot"><span class="env-total-label">봉투 합계</span><span class="env-total num" id="envTotal">0원</span></div>
-          </div>
-
-          <div class="form-error" id="incError" role="alert"></div>
-
-          <div class="form-actions">
-            <button type="button" class="btn-danger-text" id="btnIncDelete">이 봉투 삭제</button>
-            <span class="spacer"></span>
-            <button type="submit" class="btn-primary" id="btnSaveInc">봉투 담기</button>
-          </div>
-
-          <div class="recent" id="incRecent"><div class="recent-title">방금 담은 봉투 (아직 저장 전)</div><div id="incRecentList"></div></div>
-        </form>
-      </div>
-
-      <div class="sheet">
-        <h2 class="sheet-title">헌금 내역 <small id="incCount"></small></h2>
-        <div class="ledger-wrap">
-          <table class="ledger-table" id="incLedger">
-            <thead><tr><th>헌금 종류</th><th>건수</th><th>현금</th><th>계좌이체</th><th>합계</th></tr></thead>
-            <tbody></tbody>
-            <tfoot></tfoot>
-          </table>
+            <div class="line-total"><span>합계</span><span><span class="val num" id="envTotal">0원</span><small id="envSplit"></small></span></div>
+            <div class="form-error" id="incError" role="alert"></div>
+            <div class="form-actions">
+              <button type="button" class="btn-danger-text" id="btnIncDelete">이 성도 헌금 삭제</button>
+              <span class="spacer"></span>
+              <button type="submit" class="btn-primary" id="btnSaveInc">헌금 담기</button>
+            </div>
+            <div class="recent" id="incRecent"><div class="recent-title">방금 담은 헌금 (아직 저장 전)</div><div id="incRecentList"></div></div>
+          </form>
         </div>
-        <div class="list-head"><span>봉투별 내역</span><span class="screen-only">줄을 누르면 수정</span></div>
-        <div id="incomeList"></div>
-      </div>
-    </section>
 
-    <!-- ── 지출 ── -->
-    <section class="column" data-col="1">
-      <div class="sheet input-sheet">
-        <h2 class="sheet-title">지출 입력</h2>
-        <form id="expenseForm" autocomplete="off" novalidate>
-          <div class="edit-banner" id="expEditBanner" role="status">
-            <span id="expEditText"></span>
-            <button type="button" class="btn-secondary" data-action="cancel-edit" data-type="expense">수정 취소</button>
-          </div>
-          <div class="field-row">
+        <div class="seg-pane" id="paneExpense" hidden>
+          <form id="expenseForm" autocomplete="off" novalidate>
+            <div class="edit-banner" id="expEditBanner" role="status">
+              <span id="expEditText"></span>
+              <button type="button" class="btn-secondary" data-action="cancel-edit" data-type="expense">수정 취소</button>
+            </div>
             <div class="field">
               <label for="expCategory">지출 항목</label>
               <input class="inp" type="text" id="expCategory" list="expCategoryList" placeholder="예: 식대, 주보 인쇄">
               <datalist id="expCategoryList"></datalist>
             </div>
-            <div class="field" style="flex:0.8">
+            <div class="field">
               <label for="expAmount">금액</label>
-              <div class="money-wrap" style="position:relative"><input class="inp money num" id="expAmount" inputmode="numeric" placeholder="—" style="text-align:right;padding-right:34px;font-weight:700"><span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--ink-3);font-weight:600">원</span></div>
+              <div class="money-wrap"><input class="inp money num" id="expAmount" inputmode="numeric" placeholder="—"><span>원</span></div>
             </div>
-          </div>
-          <div class="form-error" id="expError" role="alert"></div>
-          <div class="form-actions">
-            <button type="button" class="btn-danger-text" id="btnExpDelete">이 지출 삭제</button>
-            <span class="spacer"></span>
-            <button type="submit" class="btn-primary" id="btnSaveExp">지출 담기</button>
-          </div>
-          <div class="recent" id="expRecent"><div class="recent-title">방금 담은 지출 (아직 저장 전)</div><div id="expRecentList"></div></div>
-        </form>
+            <div class="form-error" id="expError" role="alert"></div>
+            <div class="form-actions">
+              <button type="button" class="btn-danger-text" id="btnExpDelete">이 지출 삭제</button>
+              <span class="spacer"></span>
+              <button type="submit" class="btn-primary" id="btnSaveExp">지출 담기</button>
+            </div>
+            <div class="recent" id="expRecent"><div class="recent-title">방금 담은 지출 (아직 저장 전)</div><div id="expRecentList"></div></div>
+          </form>
+        </div>
       </div>
+    </section>
 
+    <!-- ── 2. 헌금 (기본 화면) ── -->
+    <section class="panel" data-panel="1" aria-label="헌금 내역">
+      <div class="sheet">
+        <h2 class="sheet-title">헌금 내역 <small id="incCount"></small></h2>
+        <div class="ledger" id="incLedger"></div>
+        <div class="list-head"><span>사람별 내역</span><span class="screen-only">이름을 누르면 수정</span></div>
+        <div id="incomeList"></div>
+      </div>
+    </section>
+
+    <!-- ── 3. 지출 ── -->
+    <section class="panel" data-panel="2" aria-label="지출 내역">
       <div class="sheet">
         <h2 class="sheet-title">지출 내역 <small id="expCount"></small></h2>
         <div class="list-head"><span>항목</span><span class="screen-only">줄을 누르면 수정</span></div>
         <div id="expenseList"></div>
-        <table class="ledger-table" style="margin-top:6px"><tfoot><tr><td>지출 합계</td><td class="grand num" id="txtTotalExpense">0원</td></tr></tfoot></table>
+        <div class="exp-total"><span>지출 합계</span><span class="grand num" id="txtTotalExpense">0원</span></div>
       </div>
     </section>
   </main>
@@ -532,12 +512,9 @@
     </table>
   </div>
 
-  <div class="bottom-stack">
+  <div class="bottom-stack" id="bottomStack">
     <div class="pending-bar">
-      <div class="pending-text">
-        <span id="pendingTitle">저장하지 않은 변경 0건</span>
-        <small id="pendingDetail"></small>
-      </div>
+      <div class="pending-text"><span id="pendingTitle"></span><small id="pendingDetail"></small></div>
       <button type="button" class="btn-secondary" id="btnDiscard">변경 취소</button>
       <button type="button" class="btn-primary" id="btnBatchSave">저장하기</button>
     </div>
@@ -548,13 +525,9 @@
   </div>
 
   <dialog class="dlg" id="dlg" aria-labelledby="dlgTitle">
-    <div class="dlg-body">
-      <h2 class="dlg-title" id="dlgTitle"></h2>
-      <div class="dlg-text" id="dlgText"></div>
-    </div>
+    <div class="dlg-body"><h2 class="dlg-title" id="dlgTitle"></h2><div class="dlg-text" id="dlgText"></div></div>
     <div class="dlg-actions" id="dlgActions"></div>
   </dialog>
-
   <div class="toast" id="toast" role="status" aria-live="polite"><span class="t-msg" id="toastMsg"></span><button type="button" id="toastAction" hidden></button></div>
   <div class="sr-only" aria-live="polite" id="srStatus"></div>
 
@@ -621,33 +594,30 @@
     }
 
     // ═══════════════════════════════════════════════════════════
-    // 상태
-    //  · 헌금은 '봉투 한 장 = 시트 한 줄' (한 사람의 여러 헌금을 한 줄에)
+    // 데이터 구조
+    //  · 시트 한 줄 = 한 성도의 헌금 종류 하나 (종류마다 이체 여부가 따로 기록됨)
+    //  · 화면은 같은 성도의 줄들을 '사람별'로 묶어 보여주고, 사람 단위로 수정·삭제
     //  · changes: 저장 전 변경 (추가 / 수정 / 삭제) → '저장하기' 한 번에 확정
-    //  · 날짜별로 이 기기에 임시 보관 → 창이 닫혀도 복구
     // ═══════════════════════════════════════════════════════════
     const CATEGORIES = [
-      { key: 'tithe',    label: '십일조' },
-      { key: 'thanks',   label: '감사헌금' },
-      { key: 'mission',  label: '선교헌금' },
-      { key: 'building', label: '건축헌금' },
-      { key: 'thousand', label: '일천번제' },
-      { key: 'weekly',   label: '주정헌금' },
-      { key: 'special',  label: '기타 헌금' }
+      { key: 'tithe', label: '십일조' }, { key: 'thanks', label: '감사헌금' }, { key: 'mission', label: '선교헌금' },
+      { key: 'building', label: '건축헌금' }, { key: 'thousand', label: '일천번제' }, { key: 'weekly', label: '주정헌금' },
+      { key: 'special', label: '기타 헌금' }
     ];
     const CAT_KEYS = CATEGORIES.map(c => c.key);
     const CAT_LABEL = Object.fromEntries(CATEGORIES.map(c => [c.key, c.label]));
     const DEFAULT_EXPENSES = ['식대', '주보 인쇄', '전기요금', '수도요금', '가스요금', '통신비', '선교비', '구제비', '사례비', '비품 구입', '차량 유지비'];
     const LARGE_AMOUNT = 1000000;
+    const HOME_PANEL = 1;
 
     let datePicker, currentDate = '', server = null, members = [];
     let changes = emptyChanges();
-    let editMode = null;          // { type, ref, base }
-    let saving = false;
-    let flashKey = null;
+    let editMode = null;            // { type:'income', person } | { type:'expense', ref, base, row }
+    let saving = false, flashKeys = new Set();
+    const openCats = new Set();
 
     function emptyChanges() { return { incomes: [], expenses: [], edits: {}, deletes: [] }; }
-
+    function snapshot() { return JSON.parse(JSON.stringify(changes)); }
     function showLoader() { document.getElementById('global-loader').style.display = 'flex'; }
     function hideLoader() { document.getElementById('global-loader').style.display = 'none'; }
     const $ = id => document.getElementById(id);
@@ -660,76 +630,65 @@
     function prettyDate(ymd) { const [y, m, d] = ymd.split('-').map(Number); return `${y}년 ${m}월 ${d}일 주일`; }
     function shortDate(ymd) { const [, m, d] = ymd.split('-').map(Number); return `${m}월 ${d}일`; }
     function newId(p) { return p + Date.now() + '_' + Math.random().toString(36).slice(2, 6); }
-
     function formatMoneyInput(el) {
-      const caret = el.selectionStart || 0;
-      const before = digits(el.value.slice(0, caret)).length;
+      const caret = el.selectionStart || 0, before = digits(el.value.slice(0, caret)).length;
       const raw = digits(el.value).replace(/^0+(?=\d)/, '');
       el.value = raw ? Number(raw).toLocaleString('ko-KR') : '';
       let pos = 0, seen = 0;
       while (pos < el.value.length && seen < before) { if (/\d/.test(el.value[pos])) seen++; pos++; }
       try { el.setSelectionRange(pos, pos); } catch (e) {}
     }
-
-    // 봉투 이름에서 기타 헌금명 분리: "홍길동 [성탄감사]"
     function splitName(name) {
       const m = String(name || '').match(/^(.*)\s\[(.*)\]$/);
       return m ? { person: m[1], special: m[2] } : { person: String(name || ''), special: '' };
     }
-    function envDetail(r) {
-      return CAT_KEYS.filter(k => (r[k] || 0) > 0).map(k => {
-        let label = CAT_LABEL[k];
-        if (k === 'weekly' && r.weeklyCount) label += `(${r.weeklyCount}명)`;
-        if (k === 'special') { const s = splitName(r.name).special; if (s) label = s; }
-        return `${label} ${won(r[k])}`;
-      }).join(' · ');
+    const personOf = r => splitName(r.name).person || String(r.name || '');
+    // 한 줄(row)을 종류별 항목으로 펼치기 (옛 데이터에 여러 종류가 한 줄에 있어도 처리)
+    function linesOf(r) {
+      return CAT_KEYS.filter(k => (r[k] || 0) > 0).map(k => ({
+        cat: k, amount: r[k], isTransfer: !!r.isTransfer,
+        label: k === 'special' ? (splitName(r.name).special || CAT_LABEL.special) : (k === 'weekly' && r.weeklyCount ? `주정헌금(${r.weeklyCount}명)` : CAT_LABEL[k])
+      }));
+    }
+    function detailHtml(lines) {
+      return lines.map(l => `${esc(l.label)} ${won(l.amount)}${l.isTransfer ? ' <span class="trn">이체</span>' : ''}`).join(' · ');
     }
 
     // ── 대화창 / 알림 ───────────────────────────────
     let dlgResolve = null;
     function ask({ title, html = '', tone = '', actions = [{ label: '확인', value: true, kind: 'primary' }], cancelValue = false }) {
-      const dlg = $('dlg');
-      hideToast();
+      const dlg = $('dlg'); hideToast();
       if (dlg.open) dlg.close();
       $('dlgTitle').textContent = title;
       $('dlgTitle').className = 'dlg-title' + (tone ? ' ' + tone : '');
       $('dlgText').innerHTML = html;
-      const box = $('dlgActions');
-      box.innerHTML = '';
-      box.style.display = actions.length ? '' : 'none';
+      const box = $('dlgActions'); box.innerHTML = ''; box.style.display = actions.length ? '' : 'none';
       return new Promise(resolve => {
         dlgResolve = resolve;
         actions.forEach(a => {
           const b = document.createElement('button');
-          b.type = 'button';
+          b.type = 'button'; b.textContent = a.label;
           b.className = a.kind === 'danger' ? 'btn-danger' : a.kind === 'primary' ? 'btn-primary' : 'btn-secondary';
-          b.textContent = a.label;
           b.addEventListener('click', () => { const r = dlgResolve; dlgResolve = null; dlg.close(); r && r(a.value); });
           box.appendChild(b);
         });
         dlg.oncancel = e => { if (!actions.length) { e.preventDefault(); return; } const r = dlgResolve; dlgResolve = null; r && r(cancelValue); };
         dlg.showModal();
-        const first = box.querySelector('button');
-        if (first) first.focus();
+        const first = box.querySelector('button'); if (first) first.focus();
       });
     }
-    function busy(title, text) {
-      ask({ title, html: `<div class="dlg-busy"><span class="spinner" aria-hidden="true"></span><span>${esc(text)}</span></div>`, actions: [] });
-    }
-    function closeDialog() { const d = $('dlg'); if (d.open) d.close(); dlgResolve = null; }
-
+    function busy(title, text) { ask({ title, html: `<div class="dlg-busy"><span class="spinner" aria-hidden="true"></span><span>${esc(text)}</span></div>`, actions: [] }); }
     let toastTimer = null;
     function toast(msg, action) {
       const t = $('toast'), btn = $('toastAction');
       $('toastMsg').textContent = msg;
       if (action) { btn.hidden = false; btn.textContent = action.label; btn.onclick = () => { hideToast(); action.run(); }; }
       else { btn.hidden = true; btn.onclick = null; }
-      t.classList.add('show');
-      clearTimeout(toastTimer);
+      t.classList.add('show'); clearTimeout(toastTimer);
       toastTimer = setTimeout(hideToast, action ? 7000 : 4000);
     }
     function hideToast() { $('toast').classList.remove('show'); }
-
+    function undoToast(msg, snap) { toast(msg, { label: '되돌리기', run: () => { changes = snap; renderDashboard(); toast('되돌렸습니다'); } }); }
     function fieldError(type, msg, focusId) {
       const box = $(type === 'income' ? 'incError' : 'expError');
       box.textContent = msg; box.classList.add('show');
@@ -737,83 +696,99 @@
       return false;
     }
     function clearErrors(type) {
-      const form = $(type === 'income' ? 'incomeForm' : 'expenseForm');
-      form.querySelectorAll('[aria-invalid]').forEach(el => el.removeAttribute('aria-invalid'));
-      const box = $(type === 'income' ? 'incError' : 'expError');
-      box.textContent = ''; box.classList.remove('show');
+      $(type === 'income' ? 'incomeForm' : 'expenseForm').querySelectorAll('[aria-invalid]').forEach(el => el.removeAttribute('aria-invalid'));
+      const box = $(type === 'income' ? 'incError' : 'expError'); box.textContent = ''; box.classList.remove('show');
     }
 
-    // ── 변경 건수 ───────────────────────────────────
+    // ── 변경 건수 (사람 기준으로 셈) ─────────────────────
     function countChanges() {
-      const c = { incAdds: changes.incomes.length, expAdds: changes.expenses.length, incEdits: 0, expEdits: 0, incDels: 0, expDels: 0 };
-      Object.keys(changes.edits).forEach(k => k.startsWith('income:') ? c.incEdits++ : c.expEdits++);
-      changes.deletes.forEach(k => k.startsWith('income:') ? c.incDels++ : c.expDels++);
-      c.inc = c.incAdds + c.incEdits + c.incDels; c.exp = c.expAdds + c.expEdits + c.expDels; c.total = c.inc + c.exp;
+      const touched = new Set(), c = { expAdds: changes.expenses.length, expEdits: 0, expDels: 0 };
+      changes.incomes.forEach(r => touched.add(personOf(r)));
+      const serverInc = server ? server.incomes : [];
+      const nameOfRow = key => { const ri = Number(key.split(':')[1]); const s = serverInc.find(x => x.rowIndex === ri); return s ? personOf(s) : key; };
+      Object.keys(changes.edits).forEach(k => k.startsWith('income:') ? touched.add(nameOfRow(k)) : c.expEdits++);
+      changes.deletes.forEach(k => k.startsWith('income:') ? touched.add(nameOfRow(k)) : c.expDels++);
+      c.inc = touched.size; c.exp = c.expAdds + c.expEdits + c.expDels; c.total = c.inc + c.exp;
+      c.raw = changes.incomes.length + changes.expenses.length + Object.keys(changes.edits).length + changes.deletes.length;
       return c;
     }
-    function hasPending() { return countChanges().total > 0; }
+    function hasPending() { return countChanges().raw > 0; }
 
     // ── 이 기기 임시 보관 ─────────────────────────────
     const DRAFT_PREFIX = 'elbethel-finance-draft:';
-    function saveDraft() {
-      if (!currentDate) return;
-      try { hasPending() ? localStorage.setItem(DRAFT_PREFIX + currentDate, JSON.stringify(changes)) : localStorage.removeItem(DRAFT_PREFIX + currentDate); } catch (e) {}
-    }
-    function loadDraft(date) {
-      try { const d = JSON.parse(localStorage.getItem(DRAFT_PREFIX + date) || 'null'); return d ? { incomes: d.incomes || [], expenses: d.expenses || [], edits: d.edits || {}, deletes: d.deletes || [] } : null; }
-      catch (e) { return null; }
-    }
+    function saveDraft() { if (!currentDate) return; try { hasPending() ? localStorage.setItem(DRAFT_PREFIX + currentDate, JSON.stringify(changes)) : localStorage.removeItem(DRAFT_PREFIX + currentDate); } catch (e) {} }
+    function loadDraft(date) { try { const d = JSON.parse(localStorage.getItem(DRAFT_PREFIX + date) || 'null'); return d ? { incomes: d.incomes || [], expenses: d.expenses || [], edits: d.edits || {}, deletes: d.deletes || [] } : null; } catch (e) { return null; } }
     function clearDraft(date) { try { localStorage.removeItem(DRAFT_PREFIX + date); } catch (e) {} }
+
+    // ── 화면 이동 (모바일: 입력 ← 헌금 → 지출 스와이프) ─────
+    const swipeMode = () => window.matchMedia('(max-width: 999px)').matches;
+    function goPanel(i, smooth = true) {
+      setTab(i);
+      if (swipeMode()) { const p = $('panels'); p.scrollTo({ left: i * p.clientWidth, behavior: smooth ? 'smooth' : 'auto' }); }
+    }
+    function setTab(i) { document.querySelectorAll('.panel-tabs button').forEach(b => b.setAttribute('aria-selected', String(Number(b.dataset.tab) === i))); }
+    function setSeg(type) {
+      document.querySelectorAll('.seg button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.seg === type)));
+      $('paneIncome').hidden = type !== 'income'; $('paneExpense').hidden = type !== 'expense';
+    }
+    function syncBottomHeight() { document.documentElement.style.setProperty('--bottom-h', $('bottomStack').offsetHeight + 'px'); }
 
     // ── 시작 ─────────────────────────────────────
     window.addEventListener('DOMContentLoaded', function () {
-      const t = new Date();
-      const sun = new Date(t.getFullYear(), t.getMonth(), t.getDate() - t.getDay());
+      const t = new Date(), sun = new Date(t.getFullYear(), t.getMonth(), t.getDate() - t.getDay());
       const ymd = `${sun.getFullYear()}-${String(sun.getMonth() + 1).padStart(2, '0')}-${String(sun.getDate()).padStart(2, '0')}`;
       datePicker = flatpickr('#mainDate', {
         locale: 'ko', dateFormat: 'Y-m-d', altInput: true, altFormat: 'Y.m.d (일)', altInputClass: 'date-input-nav',
-        disable: [d => d.getDay() !== 0],
-        onChange: (_s, dateStr) => onDateChange(dateStr)
+        disable: [d => d.getDay() !== 0], onChange: (_s, dateStr) => onDateChange(dateStr)
       });
       datePicker.setDate(ymd, false);
       currentDate = ymd;
-      loadDashboard({ initial: true });
-
+      syncBottomHeight();
+      if (window.ResizeObserver) new ResizeObserver(syncBottomHeight).observe($('bottomStack'));
+      requestAnimationFrame(() => goPanel(HOME_PANEL, false));
+      window.addEventListener('resize', () => { if (swipeMode()) goPanel(currentPanel(), false); });
+      loadDashboard({});
       google.script.run.withSuccessHandler(list => {
         members = Array.isArray(list) ? list : [];
         $('memberList').innerHTML = members.map(m => `<option value="${esc(m)}"></option>`).join('');
       }).withFailureHandler(() => {}).getMembers();
-
       bindEvents();
     });
-
     window.addEventListener('beforeunload', e => { if (hasPending() || saving) { e.preventDefault(); e.returnValue = ''; } });
+    function currentPanel() { const p = $('panels'); return p.clientWidth ? Math.round(p.scrollLeft / p.clientWidth) : HOME_PANEL; }
 
     function bindEvents() {
       $('incomeForm').addEventListener('submit', e => { e.preventDefault(); submitIncome(); });
       $('expenseForm').addEventListener('submit', e => { e.preventDefault(); submitExpense(); });
-      document.querySelectorAll('input.money').forEach(el => el.addEventListener('input', () => { formatMoneyInput(el); if (el.dataset.cat) updateEnvTotal(); }));
+      document.querySelectorAll('input.money').forEach(el => el.addEventListener('input', () => { formatMoneyInput(el); updateFormTotal(); }));
+      CAT_KEYS.forEach(k => $('tr_' + k).addEventListener('change', updateFormTotal));
       $('envWeeklyCount').addEventListener('input', e => { e.target.value = digits(e.target.value); });
       ['incomeForm', 'expenseForm'].forEach(id => $(id).addEventListener('input', () => clearErrors(id === 'incomeForm' ? 'income' : 'expense')));
       $('btnBatchSave').addEventListener('click', saveAllPending);
       $('btnDiscard').addEventListener('click', discardAll);
       $('btnPrint').addEventListener('click', printReport);
       document.querySelectorAll('[data-action="cancel-edit"]').forEach(b => b.addEventListener('click', () => resetForm(b.dataset.type)));
-      $('btnIncDelete').addEventListener('click', () => editMode && removeRow('income', editMode.row));
-      $('btnExpDelete').addEventListener('click', () => editMode && removeRow('expense', editMode.row));
-      document.querySelectorAll('.mobile-tabs button').forEach(b => b.addEventListener('click', () => switchTab(Number(b.dataset.tab))));
-      ['incomeList', 'expenseList'].forEach(id => $(id).addEventListener('click', onListClick));
-      ['incRecentList', 'expRecentList'].forEach(id => $(id).addEventListener('click', onRecentClick));
+      $('btnIncDelete').addEventListener('click', () => editMode && removePerson(editMode.person));
+      $('btnExpDelete').addEventListener('click', () => editMode && removeExpense(editMode.row));
+      document.querySelectorAll('.panel-tabs button').forEach(b => b.addEventListener('click', () => goPanel(Number(b.dataset.tab))));
+      document.querySelectorAll('.seg button').forEach(b => b.addEventListener('click', () => setSeg(b.dataset.seg)));
+      let st; $('panels').addEventListener('scroll', () => { clearTimeout(st); st = setTimeout(() => { if (swipeMode()) setTab(currentPanel()); }, 60); }, { passive: true });
+      $('incLedger').addEventListener('click', onLedgerClick);
+      $('incomeList').addEventListener('click', onIncomeListClick);
+      $('expenseList').addEventListener('click', onExpenseListClick);
+      $('incRecentList').addEventListener('click', e => { const b = e.target.closest('button[data-group]'); if (b) undoGroup(b.dataset.group); });
+      $('expRecentList').addEventListener('click', e => { const b = e.target.closest('button[data-id]'); if (b) { const r = expenseRows().find(x => x.ref.key === 'new:' + b.dataset.id); if (r) removeExpense(r); } });
     }
 
-    function switchTab(i) {
-      document.querySelectorAll('.column').forEach(c => c.classList.toggle('active', Number(c.dataset.col) === i));
-      document.querySelectorAll('.mobile-tabs button').forEach(b => b.setAttribute('aria-selected', String(Number(b.dataset.tab) === i)));
-    }
-
-    function updateEnvTotal() {
-      const sum = CAT_KEYS.reduce((s, k) => s + moneyOf('amt_' + k), 0);
+    function updateFormTotal() {
+      let sum = 0, cash = 0, trans = 0;
+      CAT_KEYS.forEach(k => {
+        const v = moneyOf('amt_' + k); sum += v;
+        $('tr_' + k).checked ? trans += v : cash += v;
+        document.querySelector(`.line[data-cat="${k}"]`).classList.toggle('has-amount', v > 0);
+      });
       $('envTotal').textContent = won(sum) + '원';
+      $('envSplit').textContent = sum && trans ? `현금 ${won(cash)} · 이체 ${won(trans)}` : '';
     }
 
     // ── 날짜 변경 ─────────────────────────────────
@@ -821,30 +796,24 @@
       if (!newDate || newDate === currentDate) return;
       if (saving) { datePicker.setDate(currentDate, false); return; }
       if (hasPending()) {
-        datePicker.setDate(currentDate, false);   // 확인 전까지 화면 날짜는 그대로
+        datePicker.setDate(currentDate, false);
         const n = countChanges().total;
         const r = await ask({
           title: '저장하지 않은 변경이 있습니다', tone: 'warn',
           html: `<b>${esc(shortDate(currentDate))}</b>에 저장하지 않은 변경이 <b>${n}건</b> 있습니다.<br>${esc(shortDate(newDate))}로 가기 전에 어떻게 할까요?`,
-          actions: [
-            { label: '저장하고 이동', value: 'save', kind: 'primary' },
-            { label: '저장은 나중에 (이 기기에 남겨두기)', value: 'keep', kind: 'secondary' },
-            { label: '이 날짜에 머무르기', value: 'stay', kind: 'secondary' }
-          ], cancelValue: 'stay'
+          actions: [{ label: '저장하고 이동', value: 'save', kind: 'primary' }, { label: '저장은 나중에 (이 기기에 남겨두기)', value: 'keep', kind: 'secondary' }, { label: '이 날짜에 머무르기', value: 'stay', kind: 'secondary' }],
+          cancelValue: 'stay'
         });
         if (r === 'stay') return;
-        if (r === 'save') { const ok = await commitChanges(); if (!ok) return; }
-        else saveDraft();
+        if (r === 'save') { const ok = await commitChanges(); if (!ok) return; } else saveDraft();
         datePicker.setDate(newDate, false);
       }
-      currentDate = newDate;
-      changes = emptyChanges();
+      currentDate = newDate; changes = emptyChanges(); openCats.clear();
       if (editMode) resetForm(editMode.type, true);
       loadDashboard({});
     }
 
-    // ── 데이터 불러오기 ───────────────────────────────
-    function loadDashboard({ silent = false, initial = false } = {}) {
+    function loadDashboard({ silent = false } = {}) {
       return new Promise(resolve => {
         const date = currentDate;
         if (!silent) showLoader();
@@ -852,56 +821,67 @@
           if (date !== currentDate) { resolve(false); return; }
           server = data;
           let restored = 0;
-          if (!silent) {
-            const draft = loadDraft(date);
-            if (draft) { changes = draft; restored = countChanges().total; }
-          }
-          renderDashboard();
-          hideLoader();
+          if (!silent) { const d = loadDraft(date); if (d) { changes = d; restored = countChanges().total; } }
+          renderDashboard(); hideLoader();
           if (restored) toast(`저장하지 않았던 변경 ${restored}건을 다시 불러왔습니다. 확인 후 저장해주세요.`);
           resolve(true);
         }).withFailureHandler(() => {
           hideLoader();
-          ask({ title: '데이터를 불러오지 못했습니다', tone: 'error',
-                html: '인터넷 연결을 확인한 뒤 다시 시도해주세요.',
-                actions: [{ label: '다시 불러오기', value: true, kind: 'primary' }], cancelValue: true })
-            .then(() => loadDashboard({ silent, initial }).then(resolve));
+          ask({ title: '데이터를 불러오지 못했습니다', tone: 'error', html: '인터넷 연결을 확인한 뒤 다시 시도해주세요.', actions: [{ label: '다시 불러오기', value: true, kind: 'primary' }], cancelValue: true })
+            .then(() => loadDashboard({ silent }).then(resolve));
         }).getFinancialDataByDate(date);
       });
     }
 
-    // ── 화면용 목록 (서버 + 변경) ─────────────────────
+    // ── 행 목록 (서버 + 변경) ─────────────────────────
     function rowsOf(type) {
       const list = server ? (type === 'income' ? server.incomes : server.expenses) : [];
       const rows = list.map(item => {
-        const key = `${type}:${item.rowIndex}`;
-        const edited = changes.edits[key];
+        const key = `${type}:${item.rowIndex}`, edited = changes.edits[key];
         return { ...(edited || item), rowIndex: item.rowIndex, ref: { kind: 'server', rowIndex: item.rowIndex, key },
                  status: changes.deletes.includes(key) ? 'removed' : (edited ? 'edited' : 'saved') };
       });
-      (type === 'income' ? changes.incomes : changes.expenses)
-        .forEach(item => rows.push({ ...item, ref: { kind: 'new', id: item.tempId, key: 'new:' + item.tempId }, status: 'new' }));
+      (type === 'income' ? changes.incomes : changes.expenses).forEach(item => rows.push({ ...item, ref: { kind: 'new', id: item.tempId, key: 'new:' + item.tempId }, status: 'new' }));
       return rows;
+    }
+    const incomeRows = () => rowsOf('income');
+    const expenseRows = () => rowsOf('expense');
+
+    // 사람별 묶음
+    function persons() {
+      const map = new Map();
+      incomeRows().forEach(r => {
+        const p = personOf(r);
+        if (!map.has(p)) map.set(p, { person: p, rows: [] });
+        map.get(p).rows.push(r);
+      });
+      return Array.from(map.values()).map(g => {
+        const live = g.rows.filter(r => r.status !== 'removed');
+        const lines = live.flatMap(linesOf);
+        const statuses = g.rows.map(r => r.status);
+        let status = 'saved';
+        if (!live.length) status = 'removed';
+        else if (statuses.every(s => s === 'new')) status = 'new';
+        else if (statuses.some(s => s !== 'saved')) status = 'edited';
+        return { ...g, live, lines, total: lines.reduce((s, l) => s + l.amount, 0), status };
+      });
     }
 
     function computeTotals() {
-      let cash = 0, transfer = 0, expense = 0;
-      const cats = Object.fromEntries(CAT_KEYS.map(k => [k, { count: 0, cash: 0, transfer: 0, people: 0 }]));
-      let envelopes = 0;
-      rowsOf('income').forEach(r => {
+      let cash = 0, transfer = 0, expense = 0, expCount = 0;
+      const cats = Object.fromEntries(CAT_KEYS.map(k => [k, { people: new Set(), cash: 0, transfer: 0, heads: 0 }]));
+      incomeRows().forEach(r => {
         if (r.status === 'removed') return;
-        envelopes++;
-        r.isTransfer ? transfer += r.total : cash += r.total;
-        CAT_KEYS.forEach(k => {
-          const v = r[k] || 0; if (!v) return;
-          cats[k].count++; r.isTransfer ? cats[k].transfer += v : cats[k].cash += v;
-          if (k === 'weekly') cats[k].people += (r.weeklyCount || 0);
+        linesOf(r).forEach(l => {
+          const c = cats[l.cat]; c.people.add(personOf(r));
+          l.isTransfer ? (c.transfer += l.amount, transfer += l.amount) : (c.cash += l.amount, cash += l.amount);
+          if (l.cat === 'weekly') c.heads += (r.weeklyCount || 0);
         });
       });
-      let expCount = 0;
-      rowsOf('expense').forEach(r => { if (r.status !== 'removed') { expense += r.amount; expCount++; } });
+      expenseRows().forEach(r => { if (r.status !== 'removed') { expense += r.amount; expCount++; } });
       const carry = server ? server.carryover : 0;
-      return { cash, transfer, income: cash + transfer, expense, carry, balance: carry + cash + transfer - expense, cats, envelopes, expCount };
+      const peopleCount = persons().filter(p => p.status !== 'removed').length;
+      return { cash, transfer, income: cash + transfer, expense, expCount, carry, balance: carry + cash + transfer - expense, cats, peopleCount };
     }
 
     function statusTag(s) {
@@ -911,294 +891,327 @@
       return '';
     }
     const CHEV = '<svg class="entry-chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>';
-
-    function entryHtml(type, r) {
-      const isEditing = editMode && editMode.type === type && editMode.ref.key === r.ref.key;
-      const classes = ['entry'];
-      if (r.status === 'removed') classes.push('is-removed');
-      if (isEditing) classes.push('is-editing');
-      if (flashKey && flashKey === r.ref.key) classes.push('flash');
-      const name = type === 'income' ? splitName(r.name).person || r.name : r.category;
-      const detail = type === 'income' ? envDetail(r) : '';
-      const total = type === 'income' ? r.total : r.amount;
-      const tags = (type === 'income' && r.isTransfer ? '<span class="tag transfer">계좌이체</span>' : '') + statusTag(r.status);
-      const removed = r.status === 'removed';
-      return `<div class="${classes.join(' ')}">
-        <button type="button" class="entry-main" data-action="edit" data-type="${type}" data-key="${esc(r.ref.key)}" ${removed ? 'disabled' : ''}
-          aria-label="${esc(name)} ${won(total)}원${removed ? ' (삭제 예정)' : ' 수정하기'}">
-          <span class="entry-text"><span class="entry-name"><span>${esc(name)}</span>${tags}</span>${detail ? `<span class="entry-detail num">${esc(detail)}</span>` : ''}</span>
-          <span class="entry-total num">${won(total)}원</span>${removed ? '' : CHEV}
-        </button>
-        ${removed ? `<button type="button" class="btn-secondary entry-restore" data-action="restore" data-type="${type}" data-key="${esc(r.ref.key)}">되살리기</button>` : ''}
-      </div>`;
-    }
+    const CARET = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>';
 
     function renderDashboard() {
       if (!server) return;
-      const t = computeTotals();
-      const c = countChanges();
+      const t = computeTotals(), c = countChanges();
+      const people = persons();
+      const editingPerson = editMode && editMode.type === 'income' ? editMode.person : null;
 
-      // 헌금 장부 요약표
-      const body = CATEGORIES.filter(cat => t.cats[cat.key].count).map(cat => {
-        const x = t.cats[cat.key];
-        const cnt = cat.key === 'weekly' && x.people ? `${x.count}건 · ${x.people}명` : `${x.count}건`;
-        return `<tr><td>${cat.label}</td><td class="muted num">${cnt}</td><td class="num">${won(x.cash)}</td><td class="num">${won(x.transfer)}</td><td class="num"><b>${won(x.cash + x.transfer)}</b></td></tr>`;
-      }).join('');
-      $('incLedger').querySelector('tbody').innerHTML = body || '<tr><td colspan="5" class="muted" style="text-align:center">아직 입력한 헌금이 없습니다</td></tr>';
-      $('incLedger').querySelector('tfoot').innerHTML = `<tr><td>합계</td><td class="num">${t.envelopes}봉투</td><td class="num">${won(t.cash)}</td><td class="num">${won(t.transfer)}</td><td class="grand num">${won(t.income)}원</td></tr>`;
-      $('incCount').textContent = t.envelopes ? `봉투 ${t.envelopes}장` : '';
-      $('expCount').textContent = t.expCount ? `${t.expCount}건` : '';
+      // 헌금 종류별 장부 (누르면 낸 사람 세부)
+      let lg = `<div class="lg-row lg-head"><span>헌금 종류</span><span>인원</span><span>현금</span><span>이체</span><span>합계</span></div>`;
+      CATEGORIES.forEach(cat => {
+        const x = t.cats[cat.key]; if (!x.people.size) return;
+        const open = openCats.has(cat.key);
+        const cnt = cat.key === 'weekly' && x.heads ? `${x.heads}명` : `${x.people.size}명`;
+        lg += `<button type="button" class="lg-row" data-cat="${cat.key}" aria-expanded="${open}" aria-controls="lgd_${cat.key}">
+          <span class="lg-name">${CARET}${cat.label}</span><span class="lg-count num">${cnt}</span><span class="num">${won(x.cash)}</span><span class="num">${won(x.transfer)}</span><span class="lg-sum num">${won(x.cash + x.transfer)}</span></button>`;
+        const items = [];
+        incomeRows().forEach(r => linesOf(r).filter(l => l.cat === cat.key).forEach(l => items.push({ r, l })));
+        lg += `<div class="lg-detail" id="lgd_${cat.key}" ${open ? '' : 'hidden'}>` + items.map(({ r, l }) => `
+          <button type="button" class="lg-person ${r.status === 'removed' ? 'is-removed' : ''}" data-person="${esc(personOf(r))}" ${r.status === 'removed' ? 'disabled' : ''}>
+            <span class="p-name"><span>${esc(personOf(r))}</span>${cat.key === 'special' || cat.key === 'weekly' ? `<span class="entry-detail">${esc(l.label)}</span>` : ''}${l.isTransfer ? '<span class="tag transfer">이체</span>' : ''}${statusTag(r.status)}</span>
+            <span class="p-amt num">${won(l.amount)}원</span></button>`).join('') + `</div>`;
+      });
+      if (!t.peopleCount) lg += `<div class="empty">아직 입력한 헌금이 없습니다. ‘입력’ 화면에서 첫 헌금을 입력해주세요.</div>`;
+      lg += `<div class="lg-row lg-foot"><span>합계</span><span class="num">${t.peopleCount}명</span><span class="num">${won(t.cash)}</span><span class="num">${won(t.transfer)}</span><span class="grand num">${won(t.income)}원</span></div><div class="lg-split num"><span>현금 ${won(t.cash)}</span><span>이체 ${won(t.transfer)}</span></div>`;
+      $('incLedger').innerHTML = lg;
+      $('incCount').textContent = t.peopleCount ? `${t.peopleCount}명` : '';
+
+      // 사람별 내역
+      $('incomeList').innerHTML = people.length ? people.map(p => {
+        const removed = p.status === 'removed';
+        const lines = removed ? p.rows.flatMap(linesOf) : p.lines;
+        const total = removed ? lines.reduce((s, l) => s + l.amount, 0) : p.total;
+        const cls = ['entry', removed ? 'is-removed' : '', editingPerson === p.person ? 'is-editing' : '', p.rows.some(r => flashKeys.has(r.ref.key)) ? 'flash' : ''].join(' ');
+        return `<div class="${cls}">
+          <button type="button" class="entry-main" data-person="${esc(p.person)}" ${removed ? 'disabled' : ''} aria-label="${esc(p.person)} ${won(total)}원${removed ? ' (삭제 예정)' : ' 수정하기'}">
+            <span class="entry-text"><span class="entry-name"><span>${esc(p.person)}</span>${statusTag(p.status)}</span><span class="entry-detail num">${detailHtml(lines)}</span></span>
+            <span class="entry-total num">${won(total)}원</span>${removed ? '' : CHEV}</button>
+          ${removed ? `<button type="button" class="btn-secondary entry-restore" data-restore="${esc(p.person)}">되살리기</button>` : ''}
+        </div>`;
+      }).join('') : '<div class="empty">아직 입력한 헌금이 없습니다.</div>';
+
+      // 지출
+      const exp = expenseRows();
+      $('expenseList').innerHTML = exp.length ? exp.map(r => {
+        const removed = r.status === 'removed';
+        const editing = editMode && editMode.type === 'expense' && editMode.ref.key === r.ref.key;
+        return `<div class="entry ${removed ? 'is-removed' : ''} ${editing ? 'is-editing' : ''} ${flashKeys.has(r.ref.key) ? 'flash' : ''}">
+          <button type="button" class="entry-main" data-key="${esc(r.ref.key)}" ${removed ? 'disabled' : ''} aria-label="${esc(r.category)} ${won(r.amount)}원${removed ? ' (삭제 예정)' : ' 수정하기'}">
+            <span class="entry-text"><span class="entry-name"><span>${esc(r.category)}</span>${statusTag(r.status)}</span></span>
+            <span class="entry-total num">${won(r.amount)}원</span>${removed ? '' : CHEV}</button>
+          ${removed ? `<button type="button" class="btn-secondary entry-restore" data-restore-key="${esc(r.ref.key)}">되살리기</button>` : ''}
+        </div>`;
+      }).join('') : '<div class="empty">아직 입력한 지출이 없습니다.</div>';
       $('txtTotalExpense').textContent = won(t.expense) + '원';
+      $('expCount').textContent = t.expCount ? `${t.expCount}건` : '';
+      $('expCategoryList').innerHTML = Array.from(new Set([...DEFAULT_EXPENSES, ...exp.map(r => r.category)])).map(x => `<option value="${esc(x)}"></option>`).join('');
 
-      // 목록
-      const inc = rowsOf('income');
-      $('incomeList').innerHTML = inc.length ? inc.map(r => entryHtml('income', r)).join('') : '<div class="empty">아직 입력한 봉투가 없습니다. 위에서 첫 봉투를 입력해주세요.</div>';
-      const exp = rowsOf('expense');
-      $('expenseList').innerHTML = exp.length ? exp.map(r => entryHtml('expense', r)).join('') : '<div class="empty">아직 입력한 지출이 없습니다.</div>';
-      const cats = Array.from(new Set([...DEFAULT_EXPENSES, ...exp.map(r => r.category)]));
-      $('expCategoryList').innerHTML = cats.map(x => `<option value="${esc(x)}"></option>`).join('');
+      renderRecent();
 
-      // 방금 담은 내역 (최근 3건)
-      renderRecent('income', changes.incomes, $('incRecent'), $('incRecentList'));
-      renderRecent('expense', changes.expenses, $('expRecent'), $('expRecentList'));
-
-      // 하단 잔고
+      // 하단 잔고 / 저장 바
       $('txtCarryover').textContent = won(t.carry);
-      const bal = $('txtBalance');
-      bal.textContent = won(t.balance);
-      bal.classList.toggle('negative', t.balance < 0);
-      $('balanceLabel').textContent = c.total ? '저장 후 잔고' : '잔고';
-      $('balanceGroup').classList.toggle('pending', c.total > 0);
-
-      // 저장 대기 바
-      document.body.classList.toggle('has-pending', c.total > 0);
-      $('pendingTitle').innerHTML = `<span class="wide-only">저장하지 않은 </span>변경 ${c.total}건`;
+      $('txtBalance').textContent = won(t.balance);
+      $('txtBalance').classList.toggle('negative', t.balance < 0);
+      $('balanceLabel').textContent = c.raw ? '저장 후 잔고' : '잔고';
+      $('balanceGroup').classList.toggle('pending', c.raw > 0);
+      document.body.classList.toggle('has-pending', c.raw > 0);
       const parts = [];
-      if (c.incAdds + c.expAdds) parts.push(`추가 ${c.incAdds + c.expAdds}`);
-      if (c.incEdits + c.expEdits) parts.push(`수정 ${c.incEdits + c.expEdits}`);
-      if (c.incDels + c.expDels) parts.push(`삭제 ${c.incDels + c.expDels}`);
+      if (c.inc) parts.push(`헌금 ${c.inc}명`);
+      if (c.exp) parts.push(`지출 ${c.exp}건`);
+      $('pendingTitle').innerHTML = `<span class="wide-only">저장하지 않은 </span>변경 ${c.total}건`;
       $('pendingDetail').innerHTML = esc(parts.join(' · ')) + '<span class="wide-only"> · 저장해야 장부에 남습니다</span>';
       $('btnBatchSave').textContent = `${c.total}건 저장하기`;
       $('tabCountInc').textContent = c.inc ? `(${c.inc})` : '';
       $('tabCountExp').textContent = c.exp ? `(${c.exp})` : '';
+      syncBottomHeight();
 
       // 출력용
       $('printHeaderDate').textContent = prettyDate(currentDate);
-      $('pCarry').textContent = won(t.carry) + '원';
-      $('pCash').textContent = won(t.cash) + '원';
-      $('pTransfer').textContent = won(t.transfer) + '원';
-      $('pIncome').textContent = won(t.income) + '원';
-      $('pExpense').textContent = won(t.expense) + '원';
-      $('pBalance').textContent = won(t.balance) + '원';
+      $('pCarry').textContent = won(t.carry) + '원'; $('pCash').textContent = won(t.cash) + '원'; $('pTransfer').textContent = won(t.transfer) + '원';
+      $('pIncome').textContent = won(t.income) + '원'; $('pExpense').textContent = won(t.expense) + '원'; $('pBalance').textContent = won(t.balance) + '원';
 
-      flashKey = null;
+      flashKeys = new Set();
       saveDraft();
     }
 
-    function renderRecent(type, items, box, list) {
-      const recent = items.slice(-3).reverse();
-      box.classList.toggle('show', recent.length > 0);
-      list.innerHTML = recent.map((r, i) => `
-        <div class="recent-row ${i === 0 && r._fresh ? 'flash' : ''}">
-          <span class="r-name">${esc(type === 'income' ? (splitName(r.name).person || r.name) : r.category)}${type === 'income' ? ` <span class="entry-detail">${esc(envDetail(r))}</span>` : ''}</span>
-          <span class="r-amt num">${won(type === 'income' ? r.total : r.amount)}원</span>
-          <button type="button" class="btn-secondary" data-type="${type}" data-id="${esc(r.tempId)}">되돌리기</button>
+    function renderRecent() {
+      // 헌금: 같은 묶음(groupId)으로 담은 줄들을 한 사람으로
+      const groups = [];
+      changes.incomes.forEach(r => {
+        let g = groups.find(x => x.id === r.groupId);
+        if (!g) { g = { id: r.groupId, person: personOf(r), lines: [], fresh: false }; groups.push(g); }
+        g.lines.push(...linesOf(r)); if (r._fresh) g.fresh = true;
+      });
+      const recent = groups.slice(-3).reverse();
+      $('incRecent').classList.toggle('show', recent.length > 0);
+      $('incRecentList').innerHTML = recent.map(g => `
+        <div class="recent-row ${g.fresh ? 'flash' : ''}">
+          <span class="r-text"><span class="r-name">${esc(g.person)}</span><span class="r-detail num">${detailHtml(g.lines)}</span></span>
+          <span class="r-amt num">${won(g.lines.reduce((s, l) => s + l.amount, 0))}원</span>
+          <button type="button" class="btn-secondary" data-group="${esc(g.id)}">되돌리기</button>
         </div>`).join('');
-      items.forEach(r => delete r._fresh);
+      changes.incomes.forEach(r => delete r._fresh);
+      const er = changes.expenses.slice(-3).reverse();
+      $('expRecent').classList.toggle('show', er.length > 0);
+      $('expRecentList').innerHTML = er.map(r => `
+        <div class="recent-row ${r._fresh ? 'flash' : ''}">
+          <span class="r-text"><span class="r-name">${esc(r.category)}</span></span>
+          <span class="r-amt num">${won(r.amount)}원</span>
+          <button type="button" class="btn-secondary" data-id="${esc(r.tempId)}">되돌리기</button>
+        </div>`).join('');
+      changes.expenses.forEach(r => delete r._fresh);
     }
 
     // ── 목록 조작 ─────────────────────────────────
-    function findRow(type, key) { return rowsOf(type).find(r => r.ref.key === key); }
-
-    function onListClick(e) {
-      const btn = e.target.closest('button[data-action]');
-      if (!btn) return;
-      const type = btn.dataset.type, row = findRow(type, btn.dataset.key);
+    function onLedgerClick(e) {
+      const person = e.target.closest('.lg-person');
+      if (person) { startEditPerson(person.dataset.person); return; }
+      const row = e.target.closest('button.lg-row');
       if (!row) return;
-      if (btn.dataset.action === 'edit') startEdit(type, row);
-      if (btn.dataset.action === 'restore') {
-        changes.deletes = changes.deletes.filter(k => k !== row.ref.key);
-        renderDashboard();
-        toast('삭제를 취소했습니다');
-      }
+      const k = row.dataset.cat;
+      openCats.has(k) ? openCats.delete(k) : openCats.add(k);
+      row.setAttribute('aria-expanded', String(openCats.has(k)));
+      $('lgd_' + k).hidden = !openCats.has(k);
     }
-    function onRecentClick(e) {
-      const btn = e.target.closest('button[data-id]');
-      if (!btn) return;
-      const row = findRow(btn.dataset.type, 'new:' + btn.dataset.id);
-      if (row) removeRow(btn.dataset.type, row);
+    function onIncomeListClick(e) {
+      const r = e.target.closest('[data-restore]');
+      if (r) { restorePerson(r.dataset.restore); return; }
+      const b = e.target.closest('.entry-main');
+      if (b) startEditPerson(b.dataset.person);
+    }
+    function onExpenseListClick(e) {
+      const r = e.target.closest('[data-restore-key]');
+      if (r) { changes.deletes = changes.deletes.filter(k => k !== r.dataset.restoreKey); renderDashboard(); toast('삭제를 취소했습니다'); return; }
+      const b = e.target.closest('.entry-main');
+      if (b) { const row = expenseRows().find(x => x.ref.key === b.dataset.key); if (row) startEditExpense(row); }
     }
 
-    function stripRow(r) { const o = { ...r }; delete o.ref; delete o.status; return o; }
+    function personRows(person) { return incomeRows().filter(r => personOf(r) === person); }
 
-    function removeRow(type, row) {
+    function removePerson(person) {
+      const snap = snapshot();
       if (editMode) resetForm(editMode.type, true);
-      const arr = type === 'income' ? changes.incomes : changes.expenses;
-      if (row.ref.kind === 'new') {
-        const idx = arr.findIndex(i => i.tempId === row.ref.id);
-        if (idx < 0) return;
-        const [removed] = arr.splice(idx, 1);
-        renderDashboard();
-        toast(type === 'income' ? '봉투를 목록에서 뺐습니다' : '지출을 목록에서 뺐습니다',
-              { label: '되돌리기', run: () => { arr.splice(Math.min(idx, arr.length), 0, removed); flashKey = 'new:' + removed.tempId; renderDashboard(); } });
-      } else {
-        const key = row.ref.key;
-        delete changes.edits[key];
-        if (!changes.deletes.includes(key)) changes.deletes.push(key);
-        renderDashboard();
-        toast('삭제 예정으로 표시했습니다. 저장하면 장부에서 지워집니다',
-              { label: '되돌리기', run: () => { changes.deletes = changes.deletes.filter(k => k !== key); renderDashboard(); } });
-      }
+      personRows(person).forEach(r => {
+        if (r.ref.kind === 'new') changes.incomes = changes.incomes.filter(i => i.tempId !== r.ref.id);
+        else { delete changes.edits[r.ref.key]; if (!changes.deletes.includes(r.ref.key)) changes.deletes.push(r.ref.key); }
+      });
+      renderDashboard();
+      undoToast(`${person} 님 헌금을 삭제 예정으로 표시했습니다`, snap);
+    }
+    function restorePerson(person) {
+      const keys = personRows(person).filter(r => r.ref.kind === 'server').map(r => r.ref.key);
+      changes.deletes = changes.deletes.filter(k => !keys.includes(k));
+      renderDashboard(); toast('삭제를 취소했습니다');
+    }
+    function undoGroup(groupId) {
+      const snap = snapshot();
+      const g = changes.incomes.filter(r => r.groupId === groupId);
+      changes.incomes = changes.incomes.filter(r => r.groupId !== groupId);
+      renderDashboard();
+      undoToast(`${g.length ? personOf(g[0]) : ''} 님 헌금을 목록에서 뺐습니다`, snap);
+    }
+    function removeExpense(row) {
+      const snap = snapshot();
+      if (editMode) resetForm(editMode.type, true);
+      if (row.ref.kind === 'new') changes.expenses = changes.expenses.filter(i => i.tempId !== row.ref.id);
+      else { delete changes.edits[row.ref.key]; if (!changes.deletes.includes(row.ref.key)) changes.deletes.push(row.ref.key); }
+      renderDashboard();
+      undoToast(row.ref.kind === 'new' ? '지출을 목록에서 뺐습니다' : '지출을 삭제 예정으로 표시했습니다', snap);
     }
 
     async function discardAll() {
-      const n = countChanges().total;
-      if (!n) return;
+      const n = countChanges().total; if (!n) return;
       const r = await ask({ title: `저장하지 않은 변경 ${n}건을 모두 취소할까요?`, tone: 'warn',
-        html: '담아둔 봉투와 지출, 수정·삭제 표시가 모두 사라지고 장부에 저장된 상태로 돌아갑니다.',
+        html: '담아둔 헌금과 지출, 수정·삭제 표시가 모두 사라지고 장부에 저장된 상태로 돌아갑니다.',
         actions: [{ label: '모두 취소하기', value: true, kind: 'danger' }, { label: '그대로 두기', value: false, kind: 'secondary' }] });
       if (!r) return;
+      const snap = snapshot();
       if (editMode) resetForm(editMode.type, true);
-      changes = emptyChanges();
-      clearDraft(currentDate);
-      renderDashboard();
-      toast('변경을 모두 취소했습니다');
+      changes = emptyChanges(); clearDraft(currentDate); renderDashboard();
+      undoToast('변경을 모두 취소했습니다', snap);
     }
 
-    // ── 수정 ─────────────────────────────────────
-    function startEdit(type, row) {
+    // ── 수정 시작 ─────────────────────────────────
+    function startEditPerson(person) {
+      const rows = personRows(person).filter(r => r.status !== 'removed');
+      if (!rows.length) return;
       if (editMode) resetForm(editMode.type, true);
-      editMode = { type, ref: row.ref, base: stripRow(row), row };
-      clearErrors(type);
-      if (type === 'income') {
-        switchTab(0);
-        const { person, special } = splitName(row.name);
-        $('envName').value = person === '주정헌금' && !CAT_KEYS.some(k => k !== 'weekly' && row[k]) ? '' : person;
-        $('envTransfer').checked = !!row.isTransfer;
-        CAT_KEYS.forEach(k => $('amt_' + k).value = row[k] ? won(row[k]) : '');
-        $('envWeeklyCount').value = row.weeklyCount || '';
-        $('envSpecialName').value = special;
-        updateEnvTotal();
-        $('incEditText').textContent = `봉투 수정 중: ${person}`;
-        $('incEditBanner').classList.add('show');
-        $('incomeForm').classList.add('editing');
-        $('btnSaveInc').textContent = '수정 반영';
-        $('btnIncDelete').textContent = row.ref.kind === 'new' ? '이 봉투 빼기' : '이 봉투 삭제';
-        scrollToForm('incomeForm', 'envName');
-      } else {
-        switchTab(1);
-        $('expCategory').value = row.category;
-        $('expAmount').value = won(row.amount);
-        $('expEditText').textContent = `지출 수정 중: ${row.category}`;
-        $('expEditBanner').classList.add('show');
-        $('expenseForm').classList.add('editing');
-        $('btnSaveExp').textContent = '수정 반영';
-        $('btnExpDelete').textContent = row.ref.kind === 'new' ? '이 지출 빼기' : '이 지출 삭제';
-        scrollToForm('expenseForm', 'expAmount');
-      }
+      editMode = { type: 'income', person };
+      clearErrors('income'); setSeg('income');
+      $('envName').value = person === '주정헌금' ? '' : person;
+      CAT_KEYS.forEach(k => { $('amt_' + k).value = ''; $('tr_' + k).checked = false; });
+      $('envWeeklyCount').value = ''; $('envSpecialName').value = '';
+      const sums = {};
+      rows.forEach(r => linesOf(r).forEach(l => {
+        sums[l.cat] = (sums[l.cat] || 0) + l.amount;
+        if (l.isTransfer) $('tr_' + l.cat).checked = true;
+        if (l.cat === 'weekly' && r.weeklyCount) $('envWeeklyCount').value = (Number($('envWeeklyCount').value) || 0) + r.weeklyCount;
+        if (l.cat === 'special') $('envSpecialName').value = splitName(r.name).special;
+      }));
+      Object.entries(sums).forEach(([k, v]) => $('amt_' + k).value = won(v));
+      updateFormTotal();
+      $('incEditText').textContent = `수정 중: ${person}`;
+      $('incEditBanner').classList.add('show');
+      $('incomeForm').classList.add('editing');
+      $('btnSaveInc').textContent = '수정 반영';
       renderDashboard();
+      goPanel(0);
+      setTimeout(() => $('amt_' + (Object.keys(sums)[0] || 'tithe')).focus({ preventScroll: true }), 320);
     }
-
-    function scrollToForm(formId, inputId) {
-      const navH = document.querySelector('.top-nav').offsetHeight;
-      const top = $(formId).closest('.sheet').getBoundingClientRect().top + window.scrollY - navH - 12;
-      window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
-      setTimeout(() => $(inputId).focus({ preventScroll: true }), 300);
+    function startEditExpense(row) {
+      if (editMode) resetForm(editMode.type, true);
+      editMode = { type: 'expense', ref: row.ref, row };
+      clearErrors('expense'); setSeg('expense');
+      $('expCategory').value = row.category; $('expAmount').value = won(row.amount);
+      $('expEditText').textContent = `수정 중: ${row.category}`;
+      $('expEditBanner').classList.add('show');
+      $('expenseForm').classList.add('editing');
+      $('btnSaveExp').textContent = '수정 반영';
+      $('btnExpDelete').textContent = row.ref.kind === 'new' ? '이 지출 빼기' : '이 지출 삭제';
+      renderDashboard();
+      goPanel(0);
+      setTimeout(() => $('expAmount').focus({ preventScroll: true }), 320);
     }
 
     function resetForm(type, silent) {
       clearErrors(type);
       if (type === 'income') {
         ['envName', 'envWeeklyCount', 'envSpecialName', ...CAT_KEYS.map(k => 'amt_' + k)].forEach(id => $(id).value = '');
-        $('envTransfer').checked = false;
-        updateEnvTotal();
-        $('incEditBanner').classList.remove('show');
-        $('incomeForm').classList.remove('editing');
-        $('btnSaveInc').textContent = '봉투 담기';
+        CAT_KEYS.forEach(k => $('tr_' + k).checked = false);
+        updateFormTotal();
+        $('incEditBanner').classList.remove('show'); $('incomeForm').classList.remove('editing');
+        $('btnSaveInc').textContent = '헌금 담기';
         if (!silent) $('envName').focus({ preventScroll: true });
       } else {
         ['expCategory', 'expAmount'].forEach(id => $(id).value = '');
-        $('expEditBanner').classList.remove('show');
-        $('expenseForm').classList.remove('editing');
+        $('expEditBanner').classList.remove('show'); $('expenseForm').classList.remove('editing');
         $('btnSaveExp').textContent = '지출 담기';
         if (!silent) $('expCategory').focus({ preventScroll: true });
       }
       if (editMode && editMode.type === type) { editMode = null; if (!silent) renderDashboard(); }
     }
 
-    // ── 봉투 담기 / 수정 반영 ─────────────────────────
+    // ── 헌금 담기 / 수정 반영 ─────────────────────────
+    function rowFor(person, cat, amount, isTransfer, weeklyCount, specialName) {
+      const name = cat === 'special' ? `${person} [${specialName}]` : person;
+      const r = { name, member: name, isTransfer, total: amount, weeklyCount: cat === 'weekly' ? weeklyCount : 0 };
+      CAT_KEYS.forEach(k => r[k] = k === cat ? amount : 0);
+      return r;
+    }
+
     async function submitIncome() {
       clearErrors('income');
       let person = $('envName').value.trim();
-      const isTransfer = $('envTransfer').checked;
       const amounts = Object.fromEntries(CAT_KEYS.map(k => [k, moneyOf('amt_' + k)]));
-      const total = CAT_KEYS.reduce((s, k) => s + amounts[k], 0);
+      const cats = CAT_KEYS.filter(k => amounts[k] > 0);
       const weeklyCount = Number(digits($('envWeeklyCount').value)) || 0;
       const specialName = $('envSpecialName').value.trim();
-      const onlyWeekly = amounts.weekly > 0 && CAT_KEYS.every(k => k === 'weekly' || !amounts[k]);
-
-      if (total <= 0) return fieldError('income', '헌금 종류 중 한 칸 이상에 금액을 입력해주세요.', 'amt_tithe');
-      if (!person && onlyWeekly) person = '주정헌금';
+      if (!cats.length) return fieldError('income', '헌금 종류 중 한 칸 이상에 금액을 입력해주세요.', 'amt_tithe');
+      if (!person && cats.length === 1 && cats[0] === 'weekly') person = '주정헌금';
       if (!person) return fieldError('income', '성도 이름을 입력하거나 목록에서 골라주세요.', 'envName');
       if (amounts.weekly > 0 && weeklyCount <= 0) return fieldError('income', '주정헌금을 낸 인원 수를 입력해주세요.', 'envWeeklyCount');
       if (amounts.special > 0 && !specialName) return fieldError('income', '기타 헌금의 헌금명을 입력해주세요. (예: 성탄감사)', 'envSpecialName');
 
       const isEdit = editMode && editMode.type === 'income';
-      const basePerson = isEdit ? splitName(editMode.base.name).person : '';
-      if (person !== '주정헌금' && members.length && !members.includes(person) && person !== basePerson) {
+      if (person !== '주정헌금' && members.length && !members.includes(person) && !(isEdit && person === editMode.person)) {
         const ok = await ask({ title: '성도 명단에 없는 이름입니다', tone: 'warn',
           html: `<b>${esc(person)}</b> 님은 성도 명단에 없습니다. 이 이름 그대로 담을까요?`,
           actions: [{ label: '이 이름 그대로 담기', value: true, kind: 'primary' }, { label: '이름 고치기', value: false, kind: 'secondary' }] });
         if (!ok) { $('envName').focus(); return; }
       }
-      const big = CAT_KEYS.filter(k => amounts[k] >= LARGE_AMOUNT);
+      const big = cats.filter(k => amounts[k] >= LARGE_AMOUNT);
       if (big.length) {
         const ok = await ask({ title: '큰 금액이 맞는지 확인해주세요', tone: 'warn',
           html: big.map(k => `${CAT_LABEL[k]} <b>${won(amounts[k])}원</b>`).join('<br>') + '<br>0이 하나 더 들어가지 않았나요?',
           actions: [{ label: '맞습니다', value: true, kind: 'primary' }, { label: '금액 고치기', value: false, kind: 'secondary' }] });
         if (!ok) { $('amt_' + big[0]).focus(); return; }
       }
-
-      const name = amounts.special > 0 ? `${person} [${specialName}]` : person;
-      const env = { name, member: name, isTransfer, total, weeklyCount: amounts.weekly > 0 ? weeklyCount : 0, ...amounts };
+      const newLines = cats.map(k => rowFor(person, k, amounts[k], $('tr_' + k).checked, weeklyCount, specialName));
 
       if (isEdit) {
-        if (editMode.ref.kind === 'new') {
-          const idx = changes.incomes.findIndex(i => i.tempId === editMode.ref.id);
-          if (idx > -1) changes.incomes[idx] = { ...env, tempId: editMode.ref.id };
-        } else {
-          changes.edits[editMode.ref.key] = { ...env, rowIndex: editMode.ref.rowIndex };
-        }
-        flashKey = editMode.ref.key;
+        // 이 성도의 기존 줄을 새 내용으로 맞추기: 앞에서부터 수정, 남는 줄은 삭제, 모자라면 추가
+        const existing = personRows(editMode.person).filter(r => r.status !== 'removed');
+        const groupId = newId('g_');
+        changes.incomes = changes.incomes.filter(i => !existing.some(r => r.ref.kind === 'new' && r.ref.id === i.tempId));
+        const serverRows = existing.filter(r => r.ref.kind === 'server');
+        const keys = [];
+        serverRows.forEach((r, i) => {
+          if (i < newLines.length) { changes.edits[r.ref.key] = { ...newLines[i], rowIndex: r.rowIndex }; keys.push(r.ref.key); }
+          else { delete changes.edits[r.ref.key]; if (!changes.deletes.includes(r.ref.key)) changes.deletes.push(r.ref.key); }
+        });
+        newLines.slice(serverRows.length).forEach(l => { const tempId = newId('inc_'); changes.incomes.push({ ...l, tempId, groupId }); keys.push('new:' + tempId); });
+        flashKeys = new Set(keys);
         resetForm('income', true);
         renderDashboard();
-        toast(`${person} 봉투를 고쳤습니다 (저장 전)`);
+        toast(`${person} 님 헌금을 고쳤습니다 (저장 전)`);
         $('envName').focus({ preventScroll: true });
         return;
       }
 
-      const dup = rowsOf('income').some(r => r.status !== 'removed' && splitName(r.name).person === person && r.total === total);
-      if (dup) {
-        const ok = await ask({ title: '같은 봉투가 이미 있습니다', tone: 'warn',
-          html: `${esc(person)} · ${won(total)}원 봉투가 이미 목록에 있습니다. 한 장 더 담을까요?`,
-          actions: [{ label: '한 장 더 담기', value: true, kind: 'primary' }, { label: '취소', value: false, kind: 'secondary' }] });
+      const already = persons().find(p => p.person === person && p.status !== 'removed');
+      if (already && person !== '주정헌금') {
+        const ok = await ask({ title: '이미 입력된 성도입니다', tone: 'warn',
+          html: `<b>${esc(person)}</b> 님 헌금 ${won(already.total)}원이 이미 있습니다.<br>(${detailHtml(already.lines)})<br>여기에 더 담을까요?`,
+          actions: [{ label: '더 담기', value: true, kind: 'primary' }, { label: '취소', value: false, kind: 'secondary' }] });
         if (!ok) return;
       }
-
-      const item = { ...env, tempId: newId('inc_'), _fresh: true };
-      changes.incomes.push(item);
-      flashKey = 'new:' + item.tempId;
+      const groupId = newId('g_');
+      const keys = [];
+      newLines.forEach(l => { const tempId = newId('inc_'); changes.incomes.push({ ...l, tempId, groupId, _fresh: true }); keys.push('new:' + tempId); });
+      flashKeys = new Set(keys);
       resetForm('income', true);
       renderDashboard();
-      $('srStatus').textContent = `${person} 봉투 ${won(total)}원을 담았습니다`;
+      $('srStatus').textContent = `${person} 님 헌금 ${won(newLines.reduce((s, l) => s + l.total, 0))}원을 담았습니다`;
       $('envName').focus({ preventScroll: true });
     }
 
     // ── 지출 담기 / 수정 반영 ─────────────────────────
     async function submitExpense() {
       clearErrors('expense');
-      const category = $('expCategory').value.trim();
-      const amount = moneyOf('expAmount');
+      const category = $('expCategory').value.trim(), amount = moneyOf('expAmount');
       if (!category) return fieldError('expense', '지출 항목을 입력해주세요. (예: 식대, 주보 인쇄)', 'expCategory');
       if (amount <= 0) return fieldError('expense', '지출 금액을 입력해주세요.', 'expAmount');
       if (amount >= LARGE_AMOUNT) {
@@ -1207,24 +1220,18 @@
           actions: [{ label: '맞습니다', value: true, kind: 'primary' }, { label: '금액 고치기', value: false, kind: 'secondary' }] });
         if (!ok) { $('expAmount').focus(); return; }
       }
-
       if (editMode && editMode.type === 'expense') {
         if (editMode.ref.kind === 'new') {
           const idx = changes.expenses.findIndex(i => i.tempId === editMode.ref.id);
           if (idx > -1) changes.expenses[idx] = { category, amount, tempId: editMode.ref.id };
-        } else {
-          changes.edits[editMode.ref.key] = { category, amount, rowIndex: editMode.ref.rowIndex };
-        }
-        flashKey = editMode.ref.key;
-        resetForm('expense', true);
-        renderDashboard();
+        } else changes.edits[editMode.ref.key] = { category, amount, rowIndex: editMode.ref.rowIndex };
+        flashKeys = new Set([editMode.ref.key]);
+        resetForm('expense', true); renderDashboard();
         toast(`${category} 지출을 고쳤습니다 (저장 전)`);
         $('expCategory').focus({ preventScroll: true });
         return;
       }
-
-      const dup = rowsOf('expense').some(r => r.status !== 'removed' && r.category === category && r.amount === amount);
-      if (dup) {
+      if (expenseRows().some(r => r.status !== 'removed' && r.category === category && r.amount === amount)) {
         const ok = await ask({ title: '같은 지출이 이미 있습니다', tone: 'warn',
           html: `${esc(category)} · ${won(amount)}원이 이미 목록에 있습니다. 한 번 더 담을까요?`,
           actions: [{ label: '한 번 더 담기', value: true, kind: 'primary' }, { label: '취소', value: false, kind: 'secondary' }] });
@@ -1232,9 +1239,8 @@
       }
       const item = { category, amount, tempId: newId('exp_'), _fresh: true };
       changes.expenses.push(item);
-      flashKey = 'new:' + item.tempId;
-      resetForm('expense', true);
-      renderDashboard();
+      flashKeys = new Set(['new:' + item.tempId]);
+      resetForm('expense', true); renderDashboard();
       $('srStatus').textContent = `${category} ${won(amount)}원을 담았습니다`;
       $('expCategory').focus({ preventScroll: true });
     }
@@ -1246,7 +1252,7 @@
         return { type, rowIndex: Number(row), data: type === 'income' ? { ...d, member: d.name } : { category: d.category, amount: d.amount } };
       });
       const deletes = changes.deletes.map(k => { const [type, row] = k.split(':'); return { type, rowIndex: Number(row) }; });
-      const incomes = changes.incomes.map(i => { const o = { ...i, member: i.name }; delete o._fresh; return o; });
+      const incomes = changes.incomes.map(i => { const o = { ...i, member: i.name }; delete o._fresh; delete o.groupId; delete o.tempId; return o; });
       const expenses = changes.expenses.map(e => ({ category: e.category, amount: e.amount }));
       return { incomes, expenses, updates, deletes };
     }
@@ -1255,21 +1261,16 @@
       return new Promise(resolve => {
         if (!hasPending()) { resolve(true); return; }
         const c = countChanges(), date = currentDate;
-        saving = true;
-        $('btnBatchSave').disabled = true;
+        saving = true; $('btnBatchSave').disabled = true;
         busy('장부에 저장하는 중입니다', '창을 닫지 말고 잠시만 기다려주세요.');
         google.script.run.withSuccessHandler(async result => {
-          changes = emptyChanges();
-          clearDraft(date);
-          await loadDashboard({ silent: true });       // 저장된 장부를 다시 읽어 확정 금액 표시
+          changes = emptyChanges(); clearDraft(date);
+          await loadDashboard({ silent: true });
           saving = false; $('btnBatchSave').disabled = false;
-          const t = computeTotals();
-          const skipped = result && result.skipped ? result.skipped : 0;
+          const t = computeTotals(), skipped = result && result.skipped ? result.skipped : 0;
           const done = [];
-          if (c.incAdds) done.push(`봉투 ${c.incAdds}장`);
-          if (c.expAdds) done.push(`지출 ${c.expAdds}건`);
-          if (c.incEdits + c.expEdits) done.push(`수정 ${c.incEdits + c.expEdits}건`);
-          if (c.incDels + c.expDels) done.push(`삭제 ${c.incDels + c.expDels}건`);
+          if (c.inc) done.push(`헌금 ${c.inc}명`);
+          if (c.exp) done.push(`지출 ${c.exp}건`);
           const r = await ask({
             title: `${shortDate(date)} 장부를 저장했습니다`,
             html: `<div>${esc(done.join(' · '))} 반영</div>
@@ -1279,14 +1280,12 @@
                 <tr><td>지출 합계</td><td>${won(t.expense)}원</td></tr>
                 <tr class="grand"><td>현재 잔고</td><td>${won(t.balance)}원</td></tr>
               </table>` + (skipped ? `<p style="color:var(--amber);font-weight:700">${skipped}건은 다른 곳에서 이미 바뀐 내역이라 반영하지 않았습니다. 목록을 다시 확인해주세요.</p>` : ''),
-            actions: [{ label: '재정보고 출력', value: 'print', kind: 'primary' }, { label: '닫기', value: 'close', kind: 'secondary' }],
-            cancelValue: 'close'
+            actions: [{ label: '재정보고 출력', value: 'print', kind: 'primary' }, { label: '닫기', value: 'close', kind: 'secondary' }], cancelValue: 'close'
           });
           resolve(true);
           if (r === 'print') setTimeout(() => window.print(), 150);
         }).withFailureHandler(async () => {
-          saving = false; $('btnBatchSave').disabled = false;
-          saveDraft();
+          saving = false; $('btnBatchSave').disabled = false; saveDraft();
           const r = await ask({ title: '저장하지 못했습니다', tone: 'error',
             html: '입력하신 내용은 이 기기에 그대로 남아 있습니다.<br>인터넷 연결을 확인한 뒤 다시 저장해주세요.',
             actions: [{ label: '다시 저장', value: true, kind: 'primary' }, { label: '나중에', value: false, kind: 'secondary' }] });
@@ -1307,7 +1306,6 @@
       commitChanges();
     }
 
-    // ── 출력 ─────────────────────────────────────
     async function printReport() {
       if (hasPending()) {
         const r = await ask({ title: '먼저 저장해야 출력할 수 있습니다', tone: 'warn',
