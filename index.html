@@ -11,7 +11,8 @@
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
   <link rel="manifest" href="manifest.webmanifest">
   <meta name="theme-color" content="#1f3d6b">
-  <meta name="apple-mobile-web-app-title" content="재정 관리">
+  <meta name="apple-mobile-web-app-title" content="엘벧엘재정">
+  <meta name="application-name" content="엘벧엘재정">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
 
@@ -54,7 +55,8 @@
       display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 0 24px;
     }
     .top-nav .title { margin: 0; font-family: var(--serif); font-size: 20px; font-weight: 800; white-space: nowrap; color: var(--navy); }
-    .nav-controls { display: flex; align-items: center; gap: 8px; }
+    .nav-controls { display: flex; align-items: center; gap: 8px; min-width: 0; }
+    .nav-controls .btn-ghost { flex-shrink: 0; }
     .date-input-nav {
       height: 44px; padding: 0 14px; border: 1px solid var(--rule-strong); border-radius: 8px;
       font-family: var(--sans); font-size: 16px; font-weight: 700; color: var(--ink); width: 156px;
@@ -163,11 +165,12 @@
     .recent.show { display: block; }
     .recent-title { font-size: 14px; font-weight: 800; color: var(--amber); margin-bottom: 2px; display: flex; align-items: center; gap: 6px; }
     .recent-row .btn-secondary { background: var(--sheet); }
-    .recent-row { display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 4px 0; }
+    .recent-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; column-gap: 10px; min-height: 52px; padding: 6px 0; }
+    .recent-row .r-detail { grid-column: 1 / -1; }
     .recent-row + .recent-row { border-top: 1px solid #ecd9b0; }
     .recent-row .r-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
     .recent-row .r-name { font-weight: 700; }
-    .recent-row .r-detail { font-size: 14px; color: var(--ink-2); overflow-wrap: anywhere; }
+    .recent-row .r-detail { font-size: 14px; color: var(--ink-2); }
     .recent-row .r-amt { font-weight: 800; white-space: nowrap; }
     .flash { animation: flash 1.6s cubic-bezier(0.16, 1, 0.3, 1); }
     @keyframes flash { from { background: #fbe9b7; } to { background: transparent; } }
@@ -195,11 +198,12 @@
     .lg-person .p-name { flex: 1; min-width: 0; font-weight: 600; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
     .lg-person .p-amt { font-weight: 800; white-space: nowrap; }
     .lg-person .entry-chev { width: 16px; height: 16px; }
+    .lg-sub { font-size: 15px; color: var(--ink-2); font-weight: 400; }
     .lg-person.is-removed .p-name > span:first-child, .lg-person.is-removed .p-amt { text-decoration: line-through; color: var(--ink-3); }
     .lg-foot { font-weight: 800; border-top: 3px double var(--ink); padding-top: 10px; padding-bottom: 6px; font-size: 16px; }
     .lg-foot .grand { font-family: var(--serif); font-size: 20px; color: var(--navy); }
 
-    /* ── 사람별 / 지출 목록 (누르면 수정) ── */
+    /* ── 성도별 / 지출 목록 (누르면 수정) ── */
     .list-head { display: flex; justify-content: space-between; align-items: baseline; font-size: 14px; font-weight: 700; color: var(--ink-3); padding: 0 2px 6px; border-bottom: 1px solid var(--rule-strong); }
     .entry { display: flex; align-items: stretch; border-bottom: 1px solid var(--rule); }
     .entry-main { flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px; text-align: left; background: transparent; border: none; padding: 10px 4px; min-height: 60px; cursor: pointer; color: var(--ink); }
@@ -208,7 +212,12 @@
     .entry-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
     .entry-name { font-size: 17px; font-weight: 700; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; overflow-wrap: anywhere; }
     .entry-detail { font-size: 15px; color: var(--ink-2); overflow-wrap: anywhere; }
-    .entry-detail .trn { color: var(--navy); font-weight: 700; }
+    .entry-detail .trn, .r-detail .trn { color: var(--navy); font-weight: 700; }
+    .dl { display: flex; align-items: baseline; gap: 8px; line-height: 1.55; white-space: nowrap; }
+    .dl-k { min-width: 4.2em; flex-shrink: 0; }
+    .dl-v { font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .dl .trn { white-space: nowrap; font-size: 14px; }
+    .dlg-text .dl { justify-content: center; }
     .entry-total { font-size: 18px; font-weight: 800; white-space: nowrap; }
     .entry-chev { color: var(--ink-3); flex-shrink: 0; }
     .entry.is-editing .entry-main { background: var(--amber-soft); outline: 1px solid var(--amber-line); outline-offset: -1px; }
@@ -280,7 +289,7 @@
       .narrow-only, .pending-text small.narrow-only { display: block; }
       .pending-text small.narrow-only { color: var(--ink-2); }
       .top-nav .title { font-size: 20px; flex: 1; }
-      .date-input-nav { width: 140px; font-size: 15px; padding: 0 8px; }
+      .date-input-nav { width: 140px; min-width: 0; font-size: 15px; padding: 0 8px; }
       .btn-ghost { padding: 0 12px; }
       .panel-tabs { display: flex; width: 100%; gap: 4px; padding: 3px; background: var(--sheet-sub); border: 1px solid var(--rule); border-radius: 8px; }
       .panel-tabs button { flex: 1; height: 44px; border: none; border-radius: 6px; background: transparent; font-size: 16px; font-weight: 700; color: var(--ink-2); cursor: pointer; }
@@ -303,7 +312,8 @@
     }
     @media (max-width: 600px) { .lg-row { grid-template-columns: 1.4fr 0.7fr 1.3fr; } .lg-row > :nth-child(3), .lg-row > :nth-child(4) { display: none; } .lg-split { display: flex; } }
     @media (max-width: 420px) { .title-church { display: none; } }
-    @media (max-width: 370px) { .top-nav .title { display: none; } .nav-controls { width: 100%; } .date-input-nav { flex: 1; width: auto; } .name-row { flex-wrap: wrap; } .name-row .field { flex-basis: 100%; } }
+    @media (max-width: 370px) { .top-nav .title { display: none; } .nav-controls { width: 100%; } .date-input-nav { flex: 1 1 0; width: 0; } }
+    @media (max-width: 340px) { .name-row { flex-wrap: wrap; } .name-row .field { flex-basis: 100%; } }
     @media (max-width: 360px) {
       .bottom-bar { flex-direction: column; align-items: center; }
       .pending-bar { flex-wrap: wrap; } .pending-text { flex-basis: 100%; } .pending-bar .btn-primary { flex: 1; }
@@ -523,7 +533,7 @@
       <div class="sheet">
         <h2 class="sheet-title">헌금 내역 <small id="incCount"></small></h2>
         <div class="ledger" id="incLedger"></div>
-        <div class="list-head"><span>사람별 내역</span><span class="screen-only">이름을 누르면 수정</span></div>
+        <div class="list-head"><span>성도별 내역</span><span class="screen-only">이름을 누르면 수정</span></div>
         <div id="incomeList"></div>
       </div>
     </section>
@@ -632,7 +642,7 @@
     // ═══════════════════════════════════════════════════════════
     // 데이터 구조
     //  · 시트 한 줄 = 한 성도의 헌금 종류 하나 (종류마다 이체 여부가 따로 기록됨)
-    //  · 화면은 같은 성도의 줄들을 '사람별'로 묶어 보여주고, 사람 단위로 수정·삭제
+    //  · 화면은 같은 성도의 줄들을 '성도별'로 묶어 보여주고, 사람 단위로 수정·삭제
     //  · changes: 저장 전 변경 (추가 / 수정 / 삭제) → '저장하기' 한 번에 확정
     // ═══════════════════════════════════════════════════════════
     const CATEGORIES = [
@@ -687,7 +697,7 @@
       }));
     }
     function detailHtml(lines) {
-      return lines.map(l => `${esc(l.label)} ${won(l.amount)}${l.isTransfer ? ' <span class="trn">이체</span>' : ''}`).join(' · ');
+      return lines.map(l => `<span class="dl"><span class="dl-k">${esc(l.label)}</span><span class="dl-v">${won(l.amount)}</span>${l.isTransfer ? '<span class="trn">이체</span>' : ''}</span>`).join('');
     }
 
     // ── 대화창 / 알림 ───────────────────────────────
@@ -918,7 +928,7 @@
     const incomeRows = () => rowsOf('income');
     const expenseRows = () => rowsOf('expense');
 
-    // 사람별 묶음
+    // 성도별 묶음
     function persons() {
       const map = new Map();
       incomeRows().forEach(r => {
@@ -982,7 +992,7 @@
         incomeRows().forEach(r => linesOf(r).filter(l => l.cat === cat.key).forEach(l => items.push({ r, l })));
         lg += `<div class="lg-detail" id="lgd_${cat.key}" ${open ? '' : 'hidden'}>` + items.map(({ r, l }) => `
           <button type="button" class="lg-person ${r.status === 'removed' ? 'is-removed' : ''}" data-person="${esc(personOf(r))}" ${r.status === 'removed' ? 'disabled' : ''}>
-            <span class="p-name"><span>${esc(personOf(r))}</span>${cat.key === 'special' || cat.key === 'weekly' ? `<span class="entry-detail">${esc(l.label)}</span>` : ''}${l.isTransfer ? '<span class="tag transfer">이체</span>' : ''}${statusTag(r.status)}</span>
+            <span class="p-name"><span>${esc(personOf(r))}</span>${cat.key === 'special' || cat.key === 'weekly' ? `<span class="lg-sub">${esc(l.label)}</span>` : ''}${l.isTransfer ? '<span class="tag transfer">이체</span>' : ''}${statusTag(r.status)}</span>
             <span class="p-amt num">${won(l.amount)}원</span>${r.status === 'removed' ? '' : CHEV}</button>`).join('') + `</div>`;
       });
       if (!t.peopleCount) lg += `<div class="empty">아직 입력한 헌금이 없습니다.<br><button type="button" class="btn-secondary" data-goto-input style="margin-top:10px">헌금 입력하러 가기</button></div>`;
@@ -990,7 +1000,7 @@
       $('incLedger').innerHTML = lg;
       $('incCount').textContent = t.peopleCount ? `${t.peopleCount}명` : '';
 
-      // 사람별 내역
+      // 성도별 내역
       $('incomeList').innerHTML = people.length ? people.map(p => {
         const removed = p.status === 'removed';
         const lines = removed ? p.rows.flatMap(linesOf) : p.lines;
@@ -1061,16 +1071,17 @@
       $('incRecent').classList.toggle('show', recent.length > 0);
       $('incRecentList').innerHTML = recent.slice(0, 2).map(g => `
         <div class="recent-row ${g.fresh ? 'flash' : ''}">
-          <span class="r-text"><span class="r-name">${esc(g.person)}</span><span class="r-detail num">${detailHtml(g.lines)}</span></span>
+          <span class="r-name">${esc(g.person)}</span>
           <span class="r-amt num">${won(g.lines.reduce((s, l) => s + l.amount, 0))}원</span>
           <button type="button" class="btn-secondary" data-group="${esc(g.id)}">빼기</button>
+          <span class="r-detail num">${detailHtml(g.lines)}</span>
         </div>`).join('');
       changes.incomes.forEach(r => delete r._fresh);
       const er = changes.expenses.slice(-2).reverse();
       $('expRecent').classList.toggle('show', er.length > 0);
       $('expRecentList').innerHTML = er.map(r => `
         <div class="recent-row ${r._fresh ? 'flash' : ''}">
-          <span class="r-text"><span class="r-name">${esc(r.category)}</span></span>
+          <span class="r-name">${esc(r.category)}</span>
           <span class="r-amt num">${won(r.amount)}원</span>
           <button type="button" class="btn-secondary" data-id="${esc(r.tempId)}">빼기</button>
         </div>`).join('');
@@ -1306,7 +1317,7 @@
       const already = persons().find(p => p.person === person && p.status !== 'removed');
       if (already && person !== '주정헌금') {
         const ok = await ask({ title: '이미 입력된 성도입니다', tone: 'warn',
-          html: `<b>${esc(person)}</b> 님 헌금 ${won(already.total)}원이 이미 있습니다.<br>(${detailHtml(already.lines)})<br>여기에 더 추가할까요?`,
+          html: `<b>${esc(person)}</b> 님 헌금 ${won(already.total)}원이 이미 있습니다.<div style="margin:8px 0">${detailHtml(already.lines)}</div>여기에 더 추가할까요?`,
           actions: [{ label: '더 추가', value: true, kind: 'primary' }, { label: '취소', value: false, kind: 'secondary' }] });
         if (!ok) return;
       }
