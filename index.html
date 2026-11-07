@@ -175,7 +175,30 @@
     .flash { animation: flash 1.6s cubic-bezier(0.16, 1, 0.3, 1); }
     @keyframes flash { from { background: #fbe9b7; } to { background: transparent; } }
 
-    /* ── 헌금 종류별 장부 (누르면 세부) ── */
+    /* ── 헌금별 보기: 종류마다 낸 성도를 바로 아래에 ── */
+    .view[hidden] { display: none; }
+    .cat-sec + .cat-sec { margin-top: 14px; }
+    .cat-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; padding: 8px 4px; border-bottom: 1px solid var(--rule-strong); }
+    .cat-name { font-family: var(--serif); font-size: 18px; font-weight: 800; white-space: nowrap; }
+    .cat-name small { font-family: var(--sans); font-size: 14px; font-weight: 600; color: var(--ink-3); margin-left: 6px; }
+    .cat-sum { font-size: 18px; font-weight: 800; white-space: nowrap; }
+    .cat-row { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 50px; border: none; border-bottom: 1px solid var(--rule); background: transparent; padding: 0 4px 0 14px; cursor: pointer; color: var(--ink); text-align: left; font-size: 16px; }
+    .cat-row:hover { background: var(--sheet-sub); }
+    .cat-row:disabled { cursor: default; background: transparent; }
+    .cat-row .p-name { flex: 1; min-width: 0; font-weight: 600; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .cat-row .p-amt { font-weight: 700; white-space: nowrap; }
+    .cat-row .entry-chev { width: 16px; height: 16px; }
+    .cat-row.is-removed .p-name > span:first-child, .cat-row.is-removed .p-amt { text-decoration: line-through; color: var(--ink-3); }
+    /* 합계: 합계 / 현금 / 이체 세 줄, 숫자 오른쪽 정렬 */
+    .inc-total { margin-top: 16px; border-top: 3px double var(--ink); padding: 10px 4px 2px; }
+    .it-grand-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+    .it-grand-row > span:first-child { font-weight: 800; font-size: 17px; white-space: nowrap; }
+    .it-grand-row small { font-size: 14px; font-weight: 600; color: var(--ink-3); margin-left: 6px; }
+    .it-grand { font-family: var(--serif); font-size: 24px; font-weight: 800; color: var(--navy); white-space: nowrap; }
+    .it-split { display: flex; justify-content: flex-end; align-items: baseline; gap: 12px; font-size: 16px; color: var(--ink-2); margin-top: 2px; }
+    .it-split .k { min-width: 2.5em; text-align: left; }
+    .it-split .v { min-width: 9.5ch; text-align: right; font-weight: 700; color: var(--ink); white-space: nowrap; }
+    /* (이전 장부표 스타일) */
     .ledger { margin-bottom: 20px; }
     .lg-split { display: none; justify-content: flex-end; gap: 12px; padding: 2px 4px 0; font-size: 15px; color: var(--ink-2); }
     .lg-row { display: grid; grid-template-columns: 1.3fr 0.7fr 1fr 1fr 1.1fr; gap: 6px; align-items: center; padding: 0 4px; }
@@ -325,12 +348,16 @@
     @media print {
       @page { size: A4; margin: 14mm; }
       body { padding: 0 !important; background: #fff !important; color: #000 !important; font-size: 11pt; overflow: visible !important; height: auto !important; }
-      .top-nav, .panel[data-panel="0"], .bottom-stack, .panel-tabs, .entry-chev, .entry-restore, #global-loader, .flatpickr-calendar, .tag.pending, .tag.removed, dialog, .toast, .list-head .screen-only, .lg-detail, .lg-name svg { display: none !important; }
+      .view-seg, #viewPerson, .top-nav, .panel[data-panel="0"], .bottom-stack, .panel-tabs, .entry-chev, .entry-restore, #global-loader, .flatpickr-calendar, .tag.pending, .tag.removed, dialog, .toast, .list-head .screen-only, .lg-detail, .lg-name svg { display: none !important; }
       .panels { display: grid !important; grid-template-columns: 1.2fr 0.9fr !important; gap: 8mm !important; padding: 0 !important; height: auto !important; overflow: visible !important; max-width: none !important; }
       .panel { position: static !important; max-height: none !important; overflow: visible !important; padding: 0 !important; }
       .sheet { border: none !important; box-shadow: none !important; padding: 0 !important; background: none !important; }
       .sheet-title { font-size: 13pt; border-bottom: 1.5pt solid #000; color: #000; }
-      .ledger *, .exp-total * { color: #000 !important; }
+      .ledger *, .exp-total *, .inc-total * { color: #000 !important; }
+      #viewCat { display: block !important; }
+      .cat-row { min-height: 0; padding-top: 3pt; padding-bottom: 3pt; font-size: 11pt; }
+      .cat-row .entry-chev { display: none; }
+      .inc-total { border-top: 2.5pt double #000; }
       button.lg-row { min-height: 0; padding-top: 4pt; padding-bottom: 4pt; background: none !important; font-size: 11pt; }
       .lg-foot { border-top: 2.5pt double #000; }
       .entry-main { min-height: 0; padding: 3pt 0; }
@@ -532,9 +559,18 @@
     <section class="panel" data-panel="1" id="panel1" role="tabpanel" aria-labelledby="tab1">
       <div class="sheet">
         <h2 class="sheet-title">헌금 내역 <small id="incCount"></small></h2>
-        <div class="ledger" id="incLedger"></div>
-        <div class="list-head"><span>성도별 내역</span><span class="screen-only">이름을 누르면 수정</span></div>
-        <div id="incomeList"></div>
+        <div class="seg view-seg" role="group" aria-label="헌금 내역 보기 방식">
+          <button type="button" data-view="cat" aria-pressed="true">헌금별</button>
+          <button type="button" data-view="person" aria-pressed="false">성도별</button>
+        </div>
+        <div class="view" id="viewCat">
+          <div class="ledger" id="incLedger"></div>
+        </div>
+        <div class="view" id="viewPerson" hidden>
+          <div class="list-head"><span>성도별 내역</span><span class="screen-only">이름을 누르면 수정</span></div>
+          <div id="incomeList"></div>
+        </div>
+        <div class="inc-total" id="incTotal"></div>
       </div>
     </section>
 
@@ -774,8 +810,13 @@
     }
     function selectedTab() { const b = document.querySelector('.panel-tabs [aria-selected="true"]'); return b ? Number(b.dataset.tab) : HOME_PANEL; }
     function setTab(i) { document.querySelectorAll('.panel-tabs button').forEach(b => b.setAttribute('aria-selected', String(Number(b.dataset.tab) === i))); }
+    function setView(v) {
+      document.querySelectorAll('.view-seg button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.view === v)));
+      $('viewCat').hidden = v !== 'cat'; $('viewPerson').hidden = v !== 'person';
+      try { localStorage.setItem('elbethel-inc-view', v); } catch (e) {}
+    }
     function setSeg(type) {
-      document.querySelectorAll('.seg button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.seg === type)));
+      document.querySelectorAll('.seg button[data-seg]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.seg === type)));
       $('paneIncome').hidden = type !== 'income'; $('paneExpense').hidden = type !== 'expense';
     }
     function syncBottomHeight() {
@@ -825,7 +866,10 @@
       $('btnIncDelete').addEventListener('click', () => editMode && removePerson(editMode.person));
       $('btnExpDelete').addEventListener('click', () => editMode && removeExpense(editMode.row));
       document.querySelectorAll('.panel-tabs button').forEach(b => b.addEventListener('click', () => goPanel(Number(b.dataset.tab))));
-      document.querySelectorAll('.seg button').forEach(b => b.addEventListener('click', () => setSeg(b.dataset.seg)));
+      document.querySelectorAll('.seg button[data-seg]').forEach(b => b.addEventListener('click', () => setSeg(b.dataset.seg)));
+      document.querySelectorAll('.view-seg button').forEach(b => b.addEventListener('click', () => setView(b.dataset.view)));
+      let savedView = 'cat'; try { savedView = localStorage.getItem('elbethel-inc-view') || 'cat'; } catch (e) {}
+      setView(savedView);
       let st; $('panels').addEventListener('scroll', () => { clearTimeout(st); st = setTimeout(() => { if (swipeMode()) setTab(currentPanel()); }, 60); }, { passive: true });
       $('incLedger').addEventListener('click', onLedgerClick);
       $('incomeList').addEventListener('click', onIncomeListClick);
@@ -980,24 +1024,27 @@
       const people = persons();
       const editingPerson = editMode && editMode.type === 'income' ? editMode.person : null;
 
-      // 헌금 종류별 장부 (누르면 낸 사람 세부)
-      let lg = `<div class="lg-row lg-head"><span>헌금 종류</span><span>인원</span><span>현금</span><span>이체</span><span>합계</span></div>`;
+      // 헌금별 보기: 종류마다 낸 성도를 펼쳐서
+      let lg = '';
       CATEGORIES.forEach(cat => {
-        const x = t.cats[cat.key]; if (!x.people.size) return;
-        const open = openCats.has(cat.key);
-        const cnt = cat.key === 'weekly' && x.heads ? `${x.heads}명` : `${x.people.size}명`;
-        lg += `<button type="button" class="lg-row" data-cat="${cat.key}" aria-expanded="${open}" aria-controls="lgd_${cat.key}">
-          <span class="lg-name">${CARET}${cat.label}</span><span class="lg-count num">${cnt}</span><span class="num">${won(x.cash)}</span><span class="num">${won(x.transfer)}</span><span class="lg-sum num">${won(x.cash + x.transfer)}</span></button>`;
+        const x = t.cats[cat.key];
         const items = [];
         incomeRows().forEach(r => linesOf(r).filter(l => l.cat === cat.key).forEach(l => items.push({ r, l })));
-        lg += `<div class="lg-detail" id="lgd_${cat.key}" ${open ? '' : 'hidden'}>` + items.map(({ r, l }) => `
-          <button type="button" class="lg-person ${r.status === 'removed' ? 'is-removed' : ''}" data-person="${esc(personOf(r))}" ${r.status === 'removed' ? 'disabled' : ''}>
-            <span class="p-name"><span>${esc(personOf(r))}</span>${cat.key === 'special' || cat.key === 'weekly' ? `<span class="lg-sub">${esc(l.label)}</span>` : ''}${l.isTransfer ? '<span class="tag transfer">이체</span>' : ''}${statusTag(r.status)}</span>
-            <span class="p-amt num">${won(l.amount)}원</span>${r.status === 'removed' ? '' : CHEV}</button>`).join('') + `</div>`;
+        if (!items.length) return;
+        const cnt = cat.key === 'weekly' && x.heads ? `${x.heads}명` : `${x.people.size}명`;
+        lg += `<section class="cat-sec" aria-label="${cat.label}">
+          <div class="cat-head"><span class="cat-name">${cat.label}<small>${cnt}</small></span><span class="cat-sum num">${won(x.cash + x.transfer)}원</span></div>` +
+          items.map(({ r, l }) => `
+          <button type="button" class="cat-row ${r.status === 'removed' ? 'is-removed' : ''}" data-person="${esc(personOf(r))}" ${r.status === 'removed' ? 'disabled' : ''} aria-label="${esc(personOf(r))} ${cat.label} ${won(l.amount)}원${r.status === 'removed' ? ' (삭제 예정)' : ' 수정하기'}">
+            <span class="p-name"><span>${esc(personOf(r))}</span>${cat.key === 'special' ? `<span class="lg-sub">${esc(l.label)}</span>` : ''}${cat.key === 'weekly' && r.weeklyCount ? `<span class="lg-sub">${r.weeklyCount}명</span>` : ''}${l.isTransfer ? '<span class="tag transfer">이체</span>' : ''}${statusTag(r.status)}</span>
+            <span class="p-amt num">${won(l.amount)}</span>${r.status === 'removed' ? '' : CHEV}</button>`).join('') + `</section>`;
       });
       if (!t.peopleCount) lg += `<div class="empty">아직 입력한 헌금이 없습니다.<br><button type="button" class="btn-secondary" data-goto-input style="margin-top:10px">헌금 입력하러 가기</button></div>`;
-      lg += `<div class="lg-row lg-foot"><span>합계</span><span class="num">${t.peopleCount}명</span><span class="num">${won(t.cash)}</span><span class="num">${won(t.transfer)}</span><span class="grand num">${won(t.income)}원</span></div><div class="lg-split num"><span>현금 ${won(t.cash)}</span><span>이체 ${won(t.transfer)}</span></div>`;
       $('incLedger').innerHTML = lg;
+      $('incTotal').innerHTML = `
+        <div class="it-grand-row"><span>합계<small>${t.peopleCount}명</small></span><span class="it-grand num">${won(t.income)}원</span></div>
+        <div class="it-split"><span class="k">현금</span><span class="v num">${won(t.cash)}원</span></div>
+        <div class="it-split"><span class="k">이체</span><span class="v num">${won(t.transfer)}원</span></div>`;
       $('incCount').textContent = t.peopleCount ? `${t.peopleCount}명` : '';
 
       // 성도별 내역
@@ -1090,14 +1137,8 @@
 
     // ── 목록 조작 ─────────────────────────────────
     function onLedgerClick(e) {
-      const person = e.target.closest('.lg-person');
-      if (person) { requestEditPerson(person.dataset.person); return; }
-      const row = e.target.closest('button.lg-row');
-      if (!row) return;
-      const k = row.dataset.cat;
-      openCats.has(k) ? openCats.delete(k) : openCats.add(k);
-      row.setAttribute('aria-expanded', String(openCats.has(k)));
-      $('lgd_' + k).hidden = !openCats.has(k);
+      const row = e.target.closest('.cat-row');
+      if (row && !row.disabled) requestEditPerson(row.dataset.person);
     }
     function onIncomeListClick(e) {
       const r = e.target.closest('[data-restore]');
