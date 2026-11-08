@@ -344,40 +344,60 @@
       .lg-row { font-size: 14px; }
     }
 
-    /* ── 출력 (재정보고) ── */
-    @media print {
-      @page { size: A4; margin: 14mm; }
-      body { padding: 0 !important; background: #fff !important; color: #000 !important; font-size: 11pt; overflow: visible !important; height: auto !important; }
-      .view-seg, #viewPerson, .top-nav, .panel[data-panel="0"], .bottom-stack, .panel-tabs, .entry-chev, .entry-restore, #global-loader, .flatpickr-calendar, .tag.pending, .tag.removed, dialog, .toast, .list-head .screen-only, .lg-detail, .lg-name svg { display: none !important; }
-      .panels { display: grid !important; grid-template-columns: 1.2fr 0.9fr !important; gap: 8mm !important; padding: 0 !important; height: auto !important; overflow: visible !important; max-width: none !important; }
-      .panel { position: static !important; max-height: none !important; overflow: visible !important; padding: 0 !important; }
-      .sheet { border: none !important; box-shadow: none !important; padding: 0 !important; background: none !important; }
-      .sheet-title { font-size: 13pt; border-bottom: 1.5pt solid #000; color: #000; }
-      .ledger *, .exp-total *, .inc-total * { color: #000 !important; }
-      #viewCat { display: block !important; }
-      .cat-row { min-height: 0; padding-top: 3pt; padding-bottom: 3pt; font-size: 11pt; }
-      .cat-row .entry-chev { display: none; }
-      .inc-total { border-top: 2.5pt double #000; }
-      button.lg-row { min-height: 0; padding-top: 4pt; padding-bottom: 4pt; background: none !important; font-size: 11pt; }
-      .lg-foot { border-top: 2.5pt double #000; }
-      .entry-main { min-height: 0; padding: 3pt 0; }
-      .entry-name { font-size: 11pt; } .entry-detail { font-size: 10pt; color: #000; } .entry-detail .trn { color: #000; } .entry-total { font-size: 11pt; }
-      .entry { break-inside: avoid; }
-      .tag { background: none !important; border: 0.75pt solid #000; color: #000 !important; font-size: 8.5pt; }
-      .print-only { display: block !important; }
-      .report-head { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 7mm; padding-bottom: 4mm; border-bottom: 2.5pt double #000; }
-      .report-title { font-family: var(--serif); font-size: 20pt; font-weight: 800; margin: 0; }
-      .report-date { font-size: 12pt; margin-top: 3pt; }
-      .sign-table { border-collapse: collapse; font-size: 10pt; text-align: center; }
-      .sign-table th, .sign-table td { border: 1pt solid #000; width: 22mm; }
-      .sign-table th { padding: 2pt 0; }
-      .sign-table td { height: 16mm; }
-      .report-totals { width: 100%; border-collapse: collapse; margin-top: 8mm; font-size: 12pt; }
-      .report-totals th, .report-totals td { border: 1pt solid #000; padding: 5pt 8pt; }
-      .report-totals th { text-align: left; font-weight: 700; }
-      .report-totals td { text-align: right; font-weight: 700; }
-      .report-totals tr.grand th, .report-totals tr.grand td { border-top: 2.5pt double #000; font-size: 13pt; }
-    }
+    /* ── 출력 (재정보고) ──
+       인쇄 직전에 body.printing 을 붙여 화면에서 인쇄 배치로 바꾼 뒤 높이를 재고,
+       A4 2장을 넘으면 그만큼 축소(zoom)해서 무조건 2장 안에 들어가게 함 */
+    @media print { @page { size: A4; margin: 12mm; } }
+    body.printing { width: 186mm; margin: 0 auto; padding: 0 !important; background: #fff !important; color: #000 !important; font-size: 10pt; overflow: visible !important; height: auto !important; }
+    body.printing .view-seg, body.printing #viewPerson, body.printing .top-nav, body.printing .panel[data-panel="0"], body.printing .bottom-stack,
+    body.printing .panel-tabs, body.printing .entry-chev, body.printing .entry-restore, body.printing #global-loader, body.printing .flatpickr-calendar,
+    body.printing .tag.pending, body.printing .tag.removed, body.printing dialog, body.printing .toast, body.printing .list-head .screen-only,
+    body.printing .entry.is-removed, body.printing .cat-row.is-removed { display: none !important; }
+    body.printing .print-only { display: block !important; }
+    body.printing .panels { display: block !important; padding: 0 !important; height: auto !important; overflow: visible !important; max-width: none !important; }
+    body.printing .panel { display: block !important; position: static !important; max-height: none !important; overflow: visible !important; padding: 0 !important; }
+    body.printing .panel + .panel { margin-top: 5mm; }
+    body.printing .sheet { border: none !important; box-shadow: none !important; padding: 0 !important; background: none !important; }
+    body.printing .sheet-title { font-size: 12pt; margin: 0 0 2mm; padding-bottom: 1.5mm; border-bottom: 1.5pt solid #000; color: #000; }
+    body.printing .sheet-title small { color: #000; font-size: 9pt; }
+    body.printing #viewCat { display: block !important; }
+    /* 헌금별: 종류 제목 아래 성도를 두 줄로 나란히 */
+    body.printing .cat-sec { display: grid; grid-template-columns: 1fr 1fr; column-gap: 8mm; }
+    body.printing .cat-sec + .cat-sec { margin-top: 2.5mm; }
+    body.printing .cat-head { grid-column: 1 / -1; padding: 1mm 0; border-bottom: 0.75pt solid #000; break-after: avoid; }
+    body.printing .cat-name { font-size: 10.5pt; } body.printing .cat-name small { font-size: 8.5pt; color: #000; }
+    body.printing .cat-sum { font-size: 10.5pt; }
+    body.printing .cat-row { min-height: 0; padding: 0.6mm 0; font-size: 9.5pt; border-bottom: 0.5pt solid #bbb; break-inside: avoid; }
+    body.printing .cat-row .p-name { font-weight: 500; }
+    body.printing .lg-sub { font-size: 8.5pt; color: #000; }
+    body.printing .inc-total { margin-top: 2.5mm; padding: 1.5mm 0 0; border-top: 2.5pt double #000; break-inside: avoid; }
+    body.printing .it-grand { font-size: 14pt; color: #000; }
+    body.printing .it-grand-row > span:first-child { font-size: 10.5pt; }
+    body.printing .it-split { font-size: 9.5pt; color: #000; }
+    body.printing .it-split .v { color: #000; }
+    body.printing .inc-total *, body.printing .exp-total * { color: #000 !important; }
+    /* 지출: 두 줄로 나란히 */
+    body.printing .list-head { font-size: 8.5pt; color: #000; padding-bottom: 1mm; }
+    body.printing #expenseList { display: grid; grid-template-columns: 1fr 1fr; column-gap: 8mm; }
+    body.printing .entry { break-inside: avoid; border-bottom: 0.5pt solid #bbb; }
+    body.printing .entry-main { min-height: 0; padding: 0.6mm 0; }
+    body.printing .entry-name { font-size: 9.5pt; font-weight: 500; } body.printing .entry-total { font-size: 9.5pt; font-weight: 700; }
+    body.printing .exp-total { padding: 1.5mm 0 0; font-size: 10pt; border-top: 2.5pt double #000; }
+    body.printing .exp-total .grand { font-size: 12pt; }
+    body.printing .tag { background: none !important; border: 0.5pt solid #000; color: #000 !important; font-size: 7.5pt; padding: 0 3pt; }
+    body.printing.cols3 .cat-sec, body.printing.cols3 #expenseList { grid-template-columns: 1fr 1fr 1fr; column-gap: 6mm; }
+    body.printing .report-head { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 4mm; padding-bottom: 3mm; border-bottom: 2.5pt double #000; }
+    body.printing .report-title { font-family: var(--serif); font-size: 17pt; font-weight: 800; margin: 0; }
+    body.printing .report-date { font-size: 10.5pt; margin-top: 2pt; }
+    body.printing .sign-table { border-collapse: collapse; font-size: 9pt; text-align: center; }
+    body.printing .sign-table th, body.printing .sign-table td { border: 0.75pt solid #000; width: 20mm; }
+    body.printing .sign-table th { padding: 1.5pt 0; }
+    body.printing .sign-table td { height: 13mm; }
+    body.printing .report-totals { width: 100%; border-collapse: collapse; margin-top: 5mm; font-size: 10pt; break-inside: avoid; }
+    body.printing .report-totals th, body.printing .report-totals td { border: 0.75pt solid #000; padding: 2.5pt 6pt; }
+    body.printing .report-totals th { text-align: left; font-weight: 700; }
+    body.printing .report-totals td { text-align: right; font-weight: 700; }
+    body.printing .report-totals tr.grand th, body.printing .report-totals tr.grand td { border-top: 2pt double #000; font-size: 11pt; }
 
     /* ── 로고 기반 로딩 화면 (PC·모바일 공통) ── */
     #global-loader {
@@ -1447,7 +1467,7 @@
             actions: [{ label: '재정보고 출력', value: 'print', kind: 'primary' }, { label: '닫기', value: 'close', kind: 'secondary' }], cancelValue: 'close'
           });
           resolve(true);
-          if (r === 'print') setTimeout(() => window.print(), 150);
+          if (r === 'print') setTimeout(printPages, 150);
         }).withFailureHandler(async () => {
           saving = false; $('btnBatchSave').disabled = false; saveDraft();
           const r = await ask({ title: '저장하지 못했습니다', tone: 'error',
@@ -1478,8 +1498,41 @@
         if (r) saveAllPending();
         return;
       }
-      window.print();
+      printPages();
     }
+
+    // ── 출력: A4 2장 안에 맞추기 ──────────────────────
+    const PAGE_CONTENT_MM = 297 - 24;           // A4 높이 - 위아래 여백(12mm×2)
+    const MAX_PAGES = 2;
+    function preparePrint() {
+      const body = document.body;
+      const pxPerMm = 96 / 25.4;
+      const limit = MAX_PAGES * PAGE_CONTENT_MM * pxPerMm * 0.92;   // 페이지 나눔 여유분 8%
+      const measure = () => Math.max(body.scrollHeight, document.documentElement.scrollHeight);
+      // 축소해도 종이 폭은 그대로 유지(폭을 1/zoom 만큼 넓혀서 줄바꿈이 늘지 않게) → 다시 재서 맞춤
+      const fit = () => {
+        body.style.zoom = ''; body.style.width = '';
+        let z = 1;
+        for (let i = 0; i < 4; i++) {
+          const h = measure() * z;
+          if (h <= limit) break;
+          z = Math.floor(z * (limit / h) * 1000) / 1000;
+          body.style.zoom = String(z); body.style.width = (186 / z) + 'mm';
+        }
+        return z;
+      };
+      body.classList.add('printing'); body.classList.remove('cols3');
+      let z = fit();
+      if (z < 0.8) {                                  // 내역이 아주 많으면 세 줄로 나란히 배치해서 덜 줄이기
+        body.classList.add('cols3');
+        const z3 = fit();
+        if (z3 <= z) { body.classList.remove('cols3'); z = fit(); }
+      }
+    }
+    function cleanupPrint() { const b = document.body; b.classList.remove('printing', 'cols3'); b.style.zoom = ''; b.style.width = ''; }
+    function printPages() { preparePrint(); requestAnimationFrame(() => { window.print(); }); }
+    window.addEventListener('beforeprint', () => { if (!document.body.classList.contains('printing')) preparePrint(); });
+    window.addEventListener('afterprint', cleanupPrint);
   </script>
 </body>
 </html>
