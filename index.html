@@ -151,6 +151,8 @@
     .name-block { margin-bottom: 14px; }
     .line-note { grid-column: 2 / -1; font-size: 14px; color: var(--amber); font-weight: 600; }
     .line.locked .money-wrap input, .line.locked .tr { opacity: 0.55; pointer-events: none; }
+    .line-off { display: none !important; }
+    form.editing .recent { display: none !important; }
     .narrow-only, .pending-text small.narrow-only { display: none; }
     .btn-primary { height: 54px; padding: 0 26px; border: none; border-radius: 8px; background: var(--navy); color: #fff; font-size: 17px; font-weight: 800; cursor: pointer; white-space: nowrap; }
     .btn-primary:hover { background: var(--navy-hover); }
@@ -872,7 +874,7 @@
       loadDashboard({});
       google.script.run.withSuccessHandler(list => {
         members = Array.isArray(list) ? list : [];
-        $('memberList').innerHTML = members.map(m => `<option value="${esc(m)}"></option>`).join('');
+        renderMemberList();
       }).withFailureHandler(() => {}).getMembers();
       bindEvents();
     });
@@ -888,12 +890,13 @@
       $('incomeList').addEventListener('click', e => { if (e.target.closest('[data-goto-input]')) goPanel(0); });
       $('incLedger').addEventListener('click', e => { if (e.target.closest('[data-goto-input]')) goPanel(0); });
       $('envWeeklyCount').addEventListener('input', e => { e.target.value = digits(e.target.value); });
+      $('envName').addEventListener('change', e => { const f = membersByName(e.target.value); if (f.length === 1) e.target.value = f[0]; });
       ['incomeForm', 'expenseForm'].forEach(id => $(id).addEventListener('input', () => clearErrors(id === 'incomeForm' ? 'income' : 'expense')));
       $('btnBatchSave').addEventListener('click', saveAllPending);
       $('btnDiscard').addEventListener('click', discardAll);
       $('btnPrint').addEventListener('click', printReport);
       document.querySelectorAll('[data-action="cancel-edit"]').forEach(b => b.addEventListener('click', () => resetForm(b.dataset.type)));
-      $('btnIncDelete').addEventListener('click', () => editMode && removePerson(editMode.person));
+      $('btnIncDelete').addEventListener('click', () => { if (!editMode) return; if (editMode.rowEdit) removeRowEntry(editMode.row, editMode.rowEdit.cat); else removePerson(editMode.person); });
       $('btnExpDelete').addEventListener('click', () => editMode && removeExpense(editMode.row));
       document.querySelectorAll('.panel-tabs button').forEach(b => b.addEventListener('click', () => goPanel(Number(b.dataset.tab))));
       document.querySelectorAll('.seg button[data-seg]').forEach(b => b.addEventListener('click', () => setSeg(b.dataset.seg)));
@@ -908,6 +911,33 @@
       $('expRecentList').addEventListener('click', e => { const b = e.target.closest('button[data-id]'); if (b) { const r = expenseRows().find(x => x.ref.key === 'new:' + b.dataset.id); if (r) removeExpense(r); } });
     }
 
+    // ── 성도 명단 (시트: 이름 + 직분) ──
+    function splitMember(m) { const s = String(m).trim(), i = s.indexOf(' '); return i < 0 ? { name: s, role: '' } : { name: s.slice(0, i), role: s.slice(i + 1).trim() }; }
+    function renderMemberList() {
+      const count = {};
+      members.forEach(m => { const n = splitMember(m).name; count[n] = (count[n] || 0) + 1; });
+      // 검색 목록에는 이름만 (같은 이름이 둘 이상일 때만 직분까지)
+      const opts = Array.from(new Set(members.map(m => count[splitMember(m).name] > 1 ? m : splitMember(m).name)));
+      $('memberList').innerHTML = opts.map(v => `<option value="${esc(v)}"></option>`).join('');
+    }
+    function membersByName(input) {
+      const v = String(input).trim(); if (!v) return [];
+      if (members.includes(v)) return [v];
+      return members.filter(m => splitMember(m).name === v);
+    }
+    // 이름만 입력해도 명단의 직분을 붙여 줌 (같은 이름이 여럿이면 고르게)
+    async function resolvePerson(input) {
+      const v = String(input).trim();
+      if (!v || v === '주정헌금' || !members.length) return v;
+      const found = membersByName(v);
+      if (found.length === 1) return found[0];
+      if (found.length > 1) {
+        const pick = await ask({ title: `'${v}' 성도가 ${found.length}명 있습니다`, html: '어느 분인지 골라주세요.',
+          actions: [...found.map(m => ({ label: m, value: m, kind: 'secondary' })), { label: '취소', value: null, kind: 'secondary' }], cancelValue: null });
+        return pick;
+      }
+      return v;
+    }
     function updateFormTotal() {
       let sum = 0, cash = 0, trans = 0;
       CAT_KEYS.forEach(k => {
@@ -1065,7 +1095,7 @@
         lg += `<section class="cat-sec" aria-label="${cat.label}">
           <div class="cat-head"><span class="cat-name">${cat.label}<small>${cnt}</small></span><span class="cat-sum num">${won(x.cash + x.transfer)}원</span></div>` +
           items.map(({ r, l }) => `
-          <button type="button" class="cat-row ${r.status === 'removed' ? 'is-removed' : ''}" data-person="${esc(personOf(r))}" ${r.status === 'removed' ? 'disabled' : ''} aria-label="${esc(personOf(r))} ${cat.label} ${won(l.amount)}원${r.status === 'removed' ? ' (삭제 예정)' : ' 수정하기'}">
+          <button type="button" class="cat-row ${r.status === 'removed' ? 'is-removed' : ''}" data-person="${esc(personOf(r))}" data-key="${esc(r.ref.key)}" data-cat="${cat.key}" ${r.status === 'removed' ? 'disabled' : ''} aria-label="${esc(personOf(r))} ${cat.label} ${won(l.amount)}원${r.status === 'removed' ? ' (삭제 예정)' : ' 수정하기'}">
             <span class="p-name"><span>${esc(personOf(r))}</span>${cat.key === 'special' ? `<span class="lg-sub">${esc(l.label)}</span>` : ''}${cat.key === 'weekly' && r.weeklyCount ? `<span class="lg-sub">${r.weeklyCount}명</span>` : ''}${l.isTransfer ? '<span class="tag transfer">이체</span>' : ''}${statusTag(r.status)}</span>
             <span class="p-amt num">${won(l.amount)}</span>${r.status === 'removed' ? '' : CHEV}</button>`).join('') + `</section>`;
       });
@@ -1168,7 +1198,7 @@
     // ── 목록 조작 ─────────────────────────────────
     function onLedgerClick(e) {
       const row = e.target.closest('.cat-row');
-      if (row && !row.disabled) requestEditPerson(row.dataset.person);
+      if (row && !row.disabled) requestEditRow(row.dataset.key, row.dataset.cat);
     }
     function onIncomeListClick(e) {
       const r = e.target.closest('[data-restore]');
@@ -1183,6 +1213,7 @@
       if (b) { const row = expenseRows().find(x => x.ref.key === b.dataset.key); if (row) requestEditExpense(row); }
     }
 
+    function stripRow(r) { const o = { ...r }; delete o.ref; delete o.status; return o; }
     function personRows(person) { return incomeRows().filter(r => personOf(r) === person); }
 
     function removePerson(person) {
@@ -1234,6 +1265,52 @@
       if (!(await confirmLeaveForm('income'))) { setSeg('income'); goPanel(0); return; }
       startEditPerson(person);
     }
+    async function requestEditRow(key, cat) {
+      if (editMode && editMode.type === 'income' && editMode.rowEdit && editMode.rowEdit.key === key && editMode.rowEdit.cat === cat) { goPanel(0); return; }
+      if (!(await confirmLeaveForm('income'))) { setSeg('income'); goPanel(0); return; }
+      startEditRow(key, cat);
+    }
+    function startEditRow(key, cat) {
+      const r = incomeRows().find(x => x.ref.key === key);
+      if (!r || r.status === 'removed') return;
+      const origin = swipeMode() ? selectedTab() : null;
+      if (editMode) resetForm(editMode.type, true);
+      const person = personOf(r);
+      editMode = { type: 'income', person, origin, rowEdit: { key, cat }, row: r, locked: new Set(CAT_KEYS.filter(k => k !== cat)), lockedRowKeys: new Set() };
+      clearErrors('income'); setSeg('income');
+      $('envName').value = person === '주정헌금' ? '' : person;
+      CAT_KEYS.forEach(k => { $('amt_' + k).value = ''; $('tr_' + k).checked = false; });
+      $('envWeeklyCount').value = cat === 'weekly' && r.weeklyCount ? r.weeklyCount : '';
+      $('envSpecialName').value = cat === 'special' ? splitName(r.name).special : '';
+      $('amt_' + cat).value = won(r[cat]);
+      $('tr_' + cat).checked = !!r.isTransfer;
+      document.querySelectorAll('.line').forEach(el => el.classList.toggle('line-off', el.dataset.cat !== cat));
+      document.querySelector('.tr-all').classList.add('line-off');
+      updateFormTotal();
+      $('incEditText').textContent = `수정 중: ${person} · ${CAT_LABEL[cat]} ${won(r[cat])}원`;
+      $('incEditBanner').classList.add('show');
+      $('incomeForm').classList.add('editing');
+      $('btnSaveInc').textContent = '수정 반영';
+      $('btnIncDelete').textContent = '이 헌금 삭제';
+      renderDashboard();
+      goPanel(0);
+      setTimeout(() => $('amt_' + cat).focus({ preventScroll: true }), 320);
+    }
+    function removeRowEntry(r, cat) {
+      const snap = snapshot();
+      if (editMode) resetForm(editMode.type, true);
+      const others = CAT_KEYS.filter(k => k !== cat && (r[k] || 0) > 0);
+      if (r.ref.kind === 'new') {
+        if (others.length) { const i = changes.incomes.findIndex(x => x.tempId === r.ref.id); const o = { ...changes.incomes[i] }; o[cat] = 0; o.total = CAT_KEYS.reduce((t, k) => t + (o[k] || 0), 0); changes.incomes[i] = o; }
+        else changes.incomes = changes.incomes.filter(x => x.tempId !== r.ref.id);
+      } else if (others.length) {
+        const o = stripRow(r); o[cat] = 0; if (cat === 'weekly') o.weeklyCount = 0;
+        o.total = CAT_KEYS.reduce((t, k) => t + (o[k] || 0), 0); changes.edits[r.ref.key] = o;
+      } else { delete changes.edits[r.ref.key]; if (!changes.deletes.includes(r.ref.key)) changes.deletes.push(r.ref.key); }
+      renderDashboard();
+      undoToast(`${personOf(r)} 님 ${CAT_LABEL[cat]}을 ${r.ref.kind === 'new' ? '목록에서 뺐습니다' : '삭제 예정으로 표시했습니다'}`, snap);
+      backToOrigin();
+    }
     async function requestEditExpense(row) {
       if (editMode && editMode.type === 'expense' && editMode.ref.key === row.ref.key) { goPanel(0); return; }
       if (!(await confirmLeaveForm('expense'))) { setSeg('expense'); goPanel(0); return; }
@@ -1254,10 +1331,10 @@
       if (!rows.length) return;
       const origin = swipeMode() ? selectedTab() : null;
       if (editMode) resetForm(editMode.type, true);
-      // 같은 종류를 현금·이체로 나눠 낸 경우 그 종류는 고치지 않고 그대로 둠 (합쳐지지 않게)
+      // 같은 헌금이 여러 번 입력된 종류는 합치지 않고 그대로 둠 (헌금별 보기에서 한 줄씩 수정)
       const modes = {};
-      rows.forEach(r => linesOf(r).forEach(l => { (modes[l.cat] = modes[l.cat] || new Set()).add(l.isTransfer); }));
-      const lockedRowKeys = new Set(rows.filter(r => linesOf(r).some(l => modes[l.cat].size > 1)).map(r => r.ref.key));
+      rows.forEach(r => linesOf(r).forEach(l => { modes[l.cat] = (modes[l.cat] || 0) + 1; }));
+      const lockedRowKeys = new Set(rows.filter(r => linesOf(r).some(l => modes[l.cat] > 1)).map(r => r.ref.key));
       const locked = new Set();
       rows.filter(r => lockedRowKeys.has(r.ref.key)).forEach(r => linesOf(r).forEach(l => locked.add(l.cat)));
       editMode = { type: 'income', person, origin, locked, lockedRowKeys };
@@ -1271,7 +1348,7 @@
         const line = document.querySelector(`.line[data-cat="${l.cat}"]`);
         if (!line.classList.contains('locked')) { line.classList.add('locked'); line.insertAdjacentHTML('beforeend', '<div class="line-note"></div>'); }
         const note = line.querySelector('.line-note');
-        note.textContent = (note.textContent ? note.textContent + ' · ' : '현금·이체로 나눠 낸 항목이라 그대로 둡니다: ') + `${won(l.amount)}${l.isTransfer ? '(이체)' : '(현금)'}`;
+        note.textContent = (note.textContent ? note.textContent + ' · ' : '여러 번 입력된 헌금이라 그대로 둡니다(헌금별 보기에서 한 줄씩 수정): ') + `${won(l.amount)}${l.isTransfer ? '(이체)' : '(현금)'}`;
       }));
       rows.filter(r => !editMode.lockedRowKeys.has(r.ref.key)).forEach(r => linesOf(r).forEach(l => {
         sums[l.cat] = (sums[l.cat] || 0) + l.amount;
@@ -1312,7 +1389,9 @@
         ['envName', 'envWeeklyCount', 'envSpecialName', ...CAT_KEYS.map(k => 'amt_' + k)].forEach(id => $(id).value = '');
         CAT_KEYS.forEach(k => $('tr_' + k).checked = false);
         $('trAll').checked = false; $('trAll').indeterminate = false;
-        document.querySelectorAll('.line').forEach(el => { el.classList.remove('locked'); const n = el.querySelector('.line-note'); if (n) n.remove(); });
+        document.querySelectorAll('.line').forEach(el => { el.classList.remove('locked', 'line-off'); const n = el.querySelector('.line-note'); if (n) n.remove(); });
+        document.querySelector('.tr-all').classList.remove('line-off');
+        $('btnIncDelete').textContent = '이 성도 헌금 삭제';
         $('incEditBanner').classList.remove('show'); $('incomeForm').classList.remove('editing');
         $('btnSaveInc').textContent = '목록에 추가';
         if (!silent) $('envName').focus({ preventScroll: true });
@@ -1350,6 +1429,9 @@
       if (amounts.special > 0 && !specialName) return fieldError('income', '기타 헌금의 헌금명을 입력해주세요. (예: 성탄감사)', 'envSpecialName');
 
       const isEdit = editMode && editMode.type === 'income';
+      const resolved = await resolvePerson(person);
+      if (resolved == null) { $('envName').focus(); return; }
+      person = resolved; $('envName').value = person === '주정헌금' ? $('envName').value : person;
       if (person !== '주정헌금' && members.length && !members.includes(person) && !(isEdit && person === editMode.person)) {
         const ok = await ask({ title: '성도 명단에 없는 이름입니다', tone: 'warn',
           html: `<b>${esc(person)}</b> 님은 성도 명단에 없습니다. 이 이름 그대로 추가할까요?`,
@@ -1365,6 +1447,22 @@
       }
       const newLines = cats.map(k => rowFor(person, k, amounts[k], $('tr_' + k).checked, weeklyCount, specialName));
 
+      if (isEdit && editMode.rowEdit) {
+        const { key, cat } = editMode.rowEdit, r = editMode.row;
+        if (!(amounts[cat] > 0)) return fieldError('income', '금액을 입력해주세요. 이 헌금을 지우려면 아래 ‘이 헌금 삭제’를 누르세요.', 'amt_' + cat);
+        const o = stripRow(r);
+        o[cat] = amounts[cat]; o.isTransfer = $('tr_' + cat).checked;
+        if (cat === 'weekly') o.weeklyCount = weeklyCount;
+        o.name = cat === 'special' ? `${person} [${specialName}]` : (splitName(r.name).special && (r.special || 0) > 0 ? `${person} [${splitName(r.name).special}]` : person);
+        o.member = o.name; o.total = CAT_KEYS.reduce((t, k) => t + (o[k] || 0), 0);
+        if (r.ref.kind === 'new') { const i = changes.incomes.findIndex(x => x.tempId === r.ref.id); if (i > -1) changes.incomes[i] = { ...o, tempId: r.ref.id, groupId: r.groupId }; }
+        else changes.edits[key] = { ...o, rowIndex: r.rowIndex };
+        flashKeys = new Set([key]);
+        resetForm('income', true); renderDashboard();
+        toast(`${person} 님 ${CAT_LABEL[cat]}을 고쳤습니다 (아직 장부에 저장 전)`);
+        backToOrigin();
+        return;
+      }
       if (isEdit) {
         // 이 성도의 기존 줄을 새 내용으로 맞추기: 앞에서부터 수정, 남는 줄은 삭제, 모자라면 추가
         const existing = personRows(editMode.person).filter(r => r.status !== 'removed' && !editMode.lockedRowKeys.has(r.ref.key));
@@ -1385,13 +1483,6 @@
         return;
       }
 
-      const already = persons().find(p => p.person === person && p.status !== 'removed');
-      if (already && person !== '주정헌금') {
-        const ok = await ask({ title: '이미 입력된 성도입니다', tone: 'warn',
-          html: `<b>${esc(person)}</b> 님 헌금 ${won(already.total)}원이 이미 있습니다.<div style="margin:8px 0">${detailHtml(already.lines)}</div>여기에 더 추가할까요?`,
-          actions: [{ label: '더 추가', value: true, kind: 'primary' }, { label: '취소', value: false, kind: 'secondary' }] });
-        if (!ok) return;
-      }
       const groupId = newId('g_');
       const keys = [];
       newLines.forEach(l => { const tempId = newId('inc_'); changes.incomes.push({ ...l, tempId, groupId, _fresh: true }); keys.push('new:' + tempId); });
