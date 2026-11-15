@@ -142,7 +142,7 @@
     .xsp-del:hover { background: var(--red-soft); }
     .btn-add-sp { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; min-height: 46px; margin: 8px 0; border: 1px dashed var(--rule-strong); border-radius: 8px; background: transparent; color: var(--navy); font-size: 16px; font-weight: 700; cursor: pointer; }
     .btn-add-sp:hover { background: var(--navy-soft); }
-    #envName { ime-mode: active; }
+    #envName, #envSpecialName, #expCategory, .sp-name { ime-mode: active; }
     .line[data-cat="special"] { grid-template-areas: none; }
     .line .money-wrap input { padding-left: 8px; }
     .line .money-wrap input#trf_tithe, .line .money-wrap input[id^="trf_"] { background: #f7f9fc; }
@@ -574,7 +574,7 @@
               <div class="line" data-cat="building"><label class="ln-k">건축헌금</label><div class="money-wrap"><input class="inp money num" id="amt_building" inputmode="numeric" placeholder="—" aria-label="건축헌금 현금"><span>원</span></div><div class="money-wrap"><input class="inp money num" id="trf_building" inputmode="numeric" placeholder="—" aria-label="건축헌금 계좌이체"><span>원</span></div></div>
               <div class="line" data-cat="thousand"><label class="ln-k">일천번제</label><div class="money-wrap"><input class="inp money num" id="amt_thousand" inputmode="numeric" placeholder="—" aria-label="일천번제 현금"><span>원</span></div><div class="money-wrap"><input class="inp money num" id="trf_thousand" inputmode="numeric" placeholder="—" aria-label="일천번제 계좌이체"><span>원</span></div></div>
               <div class="line" data-cat="weekly"><span class="ln-k">주정헌금<input class="inp num count-in" id="envWeeklyCount" inputmode="numeric" placeholder="인원" aria-label="주정헌금 인원"></span><div class="money-wrap"><input class="inp money num" id="amt_weekly" inputmode="numeric" placeholder="—" aria-label="주정헌금 현금"><span>원</span></div><div class="money-wrap"><input class="inp money num" id="trf_weekly" inputmode="numeric" placeholder="—" aria-label="주정헌금 계좌이체"><span>원</span></div></div>
-              <div class="line" data-cat="special"><span class="ln-k">기타 헌금</span><input class="inp special-name" id="envSpecialName" placeholder="헌금명 (예: 성탄감사)" aria-label="기타 헌금명"><div class="money-wrap"><input class="inp money num" id="amt_special" inputmode="numeric" placeholder="—" aria-label="기타 헌금 현금"><span>원</span></div><div class="money-wrap"><input class="inp money num" id="trf_special" inputmode="numeric" placeholder="—" aria-label="기타 헌금 계좌이체"><span>원</span></div></div>
+              <div class="line" data-cat="special"><span class="ln-k">기타 헌금</span><input class="inp special-name" id="envSpecialName" lang="ko" autocapitalize="off" spellcheck="false" placeholder="헌금명 (예: 성탄감사)" aria-label="기타 헌금명"><div class="money-wrap"><input class="inp money num" id="amt_special" inputmode="numeric" placeholder="—" aria-label="기타 헌금 현금"><span>원</span></div><div class="money-wrap"><input class="inp money num" id="trf_special" inputmode="numeric" placeholder="—" aria-label="기타 헌금 계좌이체"><span>원</span></div></div>
               <button type="button" class="btn-add-sp" id="btnAddSpecial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>기타 헌금 추가</button>
             </div>
             <div class="line-total"><span>합계</span><span><span class="val num" id="envTotal">0원</span><small id="envSplit"></small></span></div>
@@ -597,7 +597,7 @@
             <div class="recent" id="expRecent" role="status"><div class="recent-title">✓ 목록에 추가했습니다 · 아직 장부에 저장 전</div><div id="expRecentList"></div></div>
             <div class="field">
               <label for="expCategory">지출 항목</label>
-              <input class="inp" type="text" id="expCategory" list="expCategoryList" placeholder="예: 식대, 주보 인쇄">
+              <input class="inp" type="text" id="expCategory" lang="ko" autocapitalize="off" spellcheck="false" list="expCategoryList" placeholder="예: 식대, 주보 인쇄">
               <datalist id="expCategoryList"></datalist>
             </div>
             <div class="field">
@@ -915,6 +915,11 @@
       $('expenseForm').addEventListener('submit', e => { e.preventDefault(); submitExpense(); });
       document.querySelectorAll('input.money').forEach(el => el.addEventListener('input', () => { formatMoneyInput(el); updateFormTotal(); }));
       $('btnAddSpecial').addEventListener('click', () => addSpecialRow('', 0, 0, true));
+      // 글자를 쓰는 모든 입력칸(헌금명·지출 항목): 영어 자판으로 쳐도 한글로
+      const KO_FIELDS = '#envSpecialName, #expCategory, .sp-name';
+      document.addEventListener('input', e => { if (e.target.matches && e.target.matches(KO_FIELDS) && !e.isComposing) koreanize(e.target); });
+      document.addEventListener('compositionend', e => { const t = e.target; if (t.matches && t.matches(KO_FIELDS)) setTimeout(() => koreanize(t), 0); });
+      document.addEventListener('focusout', e => { if (e.target.matches && e.target.matches(KO_FIELDS)) koreanize(e.target); });
       $('incomeList').addEventListener('click', e => { if (e.target.closest('[data-goto-input]')) goPanel(0); });
       $('incLedger').addEventListener('click', e => { if (e.target.closest('[data-goto-input]')) goPanel(0); });
       $('envWeeklyCount').addEventListener('input', e => { e.target.value = digits(e.target.value); });
@@ -1064,7 +1069,7 @@
       const row = document.createElement('div');
       row.className = 'line xsp';
       row.innerHTML = `<span class="ln-k"><button type="button" class="xsp-del" aria-label="이 기타 헌금 칸 지우기">지우기</button></span>
-        <input class="inp special-name sp-name" placeholder="헌금명 (예: 성탄감사)" aria-label="추가 기타 헌금명">
+        <input class="inp special-name sp-name" lang="ko" autocapitalize="off" spellcheck="false" placeholder="헌금명 (예: 성탄감사)" aria-label="추가 기타 헌금명">
         <div class="money-wrap"><input class="inp money num sp-cash" inputmode="numeric" placeholder="—" aria-label="추가 기타 헌금 현금"><span>원</span></div>
         <div class="money-wrap"><input class="inp money num sp-trf" inputmode="numeric" placeholder="—" aria-label="추가 기타 헌금 계좌이체"><span>원</span></div>`;
       row.querySelector('.sp-name').value = name || '';
@@ -1507,6 +1512,7 @@
       const has = k => cash[k] > 0 || trf[k] > 0;
       const cats = CAT_KEYS.filter(has);
       const weeklyCount = Number(digits($('envWeeklyCount').value)) || 0;
+      koreanize($('envSpecialName')); document.querySelectorAll('.sp-name').forEach(koreanize);
       const specialName = $('envSpecialName').value.trim();
       const isEdit = editMode && editMode.type === 'income';
       const extras = extraSpecials().filter(x => x.cash > 0 || x.trf > 0);
@@ -1582,6 +1588,7 @@
     // ── 지출 담기 / 수정 반영 ─────────────────────────
     async function submitExpense() {
       clearErrors('expense');
+      koreanize($('expCategory'));
       const category = $('expCategory').value.trim(), amount = moneyOf('expAmount');
       if (!category) return fieldError('expense', '지출 항목을 입력해주세요. (예: 식대, 주보 인쇄)', 'expCategory');
       if (amount <= 0) return fieldError('expense', '지출 금액을 입력해주세요.', 'expAmount');
