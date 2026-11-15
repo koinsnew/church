@@ -135,8 +135,14 @@
     .line.has-amount > label { color: var(--navy); }
     .ln-k { font-size: 16px; font-weight: 700; display: flex; flex-direction: column; gap: 4px; }
     .ln-k .count-in { height: 36px; padding: 0 6px; font-size: 15px; text-align: center; width: 64px; }
-    .line[data-cat="special"] .special-name { grid-column: 2 / -1; height: 44px; font-size: 16px; }
-    .line[data-cat="special"] .money-wrap:first-of-type { grid-column: 2; }
+    .line[data-cat="special"] .special-name, .line.xsp .special-name { grid-column: 2 / -1; height: 44px; font-size: 16px; }
+    .line[data-cat="special"] .money-wrap:first-of-type, .line.xsp .money-wrap:first-of-type { grid-column: 2; }
+    .line.xsp .ln-k { grid-row: 1 / span 2; align-self: start; }
+    .xsp-del { height: 36px; padding: 0 8px; border: 1px solid var(--rule-strong); border-radius: 6px; background: #fff; color: var(--red); font-size: 14px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+    .xsp-del:hover { background: var(--red-soft); }
+    .btn-add-sp { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; min-height: 46px; margin: 8px 0; border: 1px dashed var(--rule-strong); border-radius: 8px; background: transparent; color: var(--navy); font-size: 16px; font-weight: 700; cursor: pointer; }
+    .btn-add-sp:hover { background: var(--navy-soft); }
+    #envName { ime-mode: active; }
     .line[data-cat="special"] { grid-template-areas: none; }
     .line .money-wrap input { padding-left: 8px; }
     .line .money-wrap input#trf_tithe, .line .money-wrap input[id^="trf_"] { background: #f7f9fc; }
@@ -557,7 +563,7 @@
             <div class="recent" id="incRecent" role="status"><div class="recent-title">✓ 목록에 추가했습니다 · 아직 장부에 저장 전</div><div id="incRecentList"></div></div>
             <div class="field name-block name-field">
               <label for="envName">성도 이름</label>
-              <input class="inp" type="text" id="envName" placeholder="이름 검색" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="nameSuggest">
+              <input class="inp" type="text" id="envName" lang="ko" placeholder="이름 검색" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="nameSuggest">
               <div class="suggest" id="nameSuggest" role="listbox" hidden></div>
             </div>
             <div class="lines">
@@ -569,6 +575,7 @@
               <div class="line" data-cat="thousand"><label class="ln-k">일천번제</label><div class="money-wrap"><input class="inp money num" id="amt_thousand" inputmode="numeric" placeholder="—" aria-label="일천번제 현금"><span>원</span></div><div class="money-wrap"><input class="inp money num" id="trf_thousand" inputmode="numeric" placeholder="—" aria-label="일천번제 계좌이체"><span>원</span></div></div>
               <div class="line" data-cat="weekly"><span class="ln-k">주정헌금<input class="inp num count-in" id="envWeeklyCount" inputmode="numeric" placeholder="인원" aria-label="주정헌금 인원"></span><div class="money-wrap"><input class="inp money num" id="amt_weekly" inputmode="numeric" placeholder="—" aria-label="주정헌금 현금"><span>원</span></div><div class="money-wrap"><input class="inp money num" id="trf_weekly" inputmode="numeric" placeholder="—" aria-label="주정헌금 계좌이체"><span>원</span></div></div>
               <div class="line" data-cat="special"><span class="ln-k">기타 헌금</span><input class="inp special-name" id="envSpecialName" placeholder="헌금명 (예: 성탄감사)" aria-label="기타 헌금명"><div class="money-wrap"><input class="inp money num" id="amt_special" inputmode="numeric" placeholder="—" aria-label="기타 헌금 현금"><span>원</span></div><div class="money-wrap"><input class="inp money num" id="trf_special" inputmode="numeric" placeholder="—" aria-label="기타 헌금 계좌이체"><span>원</span></div></div>
+              <button type="button" class="btn-add-sp" id="btnAddSpecial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>기타 헌금 추가</button>
             </div>
             <div class="line-total"><span>합계</span><span><span class="val num" id="envTotal">0원</span><small id="envSplit"></small></span></div>
             <div class="form-error" id="incError" role="alert"></div>
@@ -907,10 +914,13 @@
       $('incomeForm').addEventListener('submit', e => { e.preventDefault(); submitIncome(); });
       $('expenseForm').addEventListener('submit', e => { e.preventDefault(); submitExpense(); });
       document.querySelectorAll('input.money').forEach(el => el.addEventListener('input', () => { formatMoneyInput(el); updateFormTotal(); }));
+      $('btnAddSpecial').addEventListener('click', () => addSpecialRow('', 0, 0, true));
       $('incomeList').addEventListener('click', e => { if (e.target.closest('[data-goto-input]')) goPanel(0); });
       $('incLedger').addEventListener('click', e => { if (e.target.closest('[data-goto-input]')) goPanel(0); });
       $('envWeeklyCount').addEventListener('input', e => { e.target.value = digits(e.target.value); });
       const nm = $('envName');
+      nm.addEventListener('input', e => { if (!e.isComposing) koreanize(nm); });
+      nm.addEventListener('compositionend', () => setTimeout(() => koreanize(nm), 0));
       ['input', 'compositionupdate', 'compositionend', 'focus'].forEach(ev => nm.addEventListener(ev, () => setTimeout(updateSuggest, 0)));
       nm.addEventListener('keydown', e => {
         if ($('nameSuggest').hidden) return;
@@ -919,7 +929,7 @@
         else if (e.key === 'Enter' && !e.isComposing && sgIndex >= 0) { e.preventDefault(); pickSuggest(sgIndex); }
         else if (e.key === 'Escape') hideSuggest();
       });
-      nm.addEventListener('blur', () => setTimeout(() => { hideSuggest(); const f = membersByName(nm.value); if (f.length === 1) nm.value = f[0]; }, 150));
+      nm.addEventListener('blur', () => setTimeout(() => { hideSuggest(); koreanize(nm); const f = membersByName(nm.value); if (f.length === 1) nm.value = f[0]; }, 150));
       $('nameSuggest').addEventListener('pointerdown', e => { const b = e.target.closest('.sg-item'); if (b) { e.preventDefault(); pickSuggest(Number(b.dataset.i)); } });
       ['incomeForm', 'expenseForm'].forEach(id => $(id).addEventListener('input', () => clearErrors(id === 'incomeForm' ? 'income' : 'expense')));
       $('btnBatchSave').addEventListener('click', saveAllPending);
@@ -947,15 +957,68 @@
     const CHO = 'ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ';
     const choOf = str => Array.from(str).map(ch => { const c = ch.charCodeAt(0) - 0xac00; return c >= 0 && c < 11172 ? CHO[Math.floor(c / 588)] : ch; }).join('');
     const isChoOnly = str => /^[ㄱ-ㅎ]+$/.test(str);
+    // 영어 자판 상태로 쳐도 한글로 바꿔 줌 (rla → 김). 이 앱은 영어 이름을 쓰지 않음
+    const KEY2JAMO = { r:'ㄱ',R:'ㄲ',s:'ㄴ',e:'ㄷ',E:'ㄸ',f:'ㄹ',a:'ㅁ',q:'ㅂ',Q:'ㅃ',t:'ㅅ',T:'ㅆ',d:'ㅇ',w:'ㅈ',W:'ㅉ',c:'ㅊ',z:'ㅋ',x:'ㅌ',v:'ㅍ',g:'ㅎ',
+                       k:'ㅏ',o:'ㅐ',i:'ㅑ',O:'ㅒ',j:'ㅓ',p:'ㅔ',u:'ㅕ',P:'ㅖ',h:'ㅗ',y:'ㅛ',n:'ㅜ',b:'ㅠ',m:'ㅡ',l:'ㅣ' };
+    const JUNG = 'ㅏㅐㅑㅒㅓㅔㅕㅖㅗㅘㅙㅚㅛㅜㅝㅞㅟㅠㅡㅢㅣ';
+    const JONG = ['', 'ㄱ','ㄲ','ㄳ','ㄴ','ㄵ','ㄶ','ㄷ','ㄹ','ㄺ','ㄻ','ㄼ','ㄽ','ㄾ','ㄿ','ㅀ','ㅁ','ㅂ','ㅄ','ㅅ','ㅆ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+    const VSPLIT = { 'ㅘ':'ㅗㅏ','ㅙ':'ㅗㅐ','ㅚ':'ㅗㅣ','ㅝ':'ㅜㅓ','ㅞ':'ㅜㅔ','ㅟ':'ㅜㅣ','ㅢ':'ㅡㅣ' };
+    const CSPLIT = { 'ㄳ':'ㄱㅅ','ㄵ':'ㄴㅈ','ㄶ':'ㄴㅎ','ㄺ':'ㄹㄱ','ㄻ':'ㄹㅁ','ㄼ':'ㄹㅂ','ㄽ':'ㄹㅅ','ㄾ':'ㄹㅌ','ㄿ':'ㄹㅍ','ㅀ':'ㄹㅎ','ㅄ':'ㅂㅅ' };
+    const VJOIN = Object.fromEntries(Object.entries(VSPLIT).map(([k, v]) => [v, k]));
+    const CJOIN = Object.fromEntries(Object.entries(CSPLIT).map(([k, v]) => [v, k]));
+    function toHangul(str) {
+      if (!/[a-zA-Z]/.test(str)) return str;
+      const j = [];
+      const pushJamo = c => { const sp = VSPLIT[c] || CSPLIT[c]; if (sp) j.push(sp[0], sp[1]); else j.push(c); };
+      Array.from(str).forEach(ch => {
+        const code = ch.charCodeAt(0) - 0xac00;
+        if (code >= 0 && code < 11172) { j.push(CHO[Math.floor(code / 588)]); pushJamo(JUNG[Math.floor((code % 588) / 28)]); const jo = JONG[code % 28]; if (jo) pushJamo(jo); }
+        else if (/[a-zA-Z]/.test(ch)) pushJamo(KEY2JAMO[ch] || KEY2JAMO[ch.toLowerCase()] || ch);
+        else pushJamo(ch);
+      });
+      const isC = c => c && CHO.includes(c), isV = c => c && JUNG.includes(c);
+      let out = '', i = 0;
+      while (i < j.length) {
+        const c = j[i];
+        if (isC(c) && isV(j[i + 1])) {
+          let v = j[i + 1]; i += 2;
+          if (isV(j[i]) && VJOIN[v + j[i]]) { v = VJOIN[v + j[i]]; i++; }
+          let jo = '';
+          if (isC(j[i]) && JONG.indexOf(j[i]) > 0 && !isV(j[i + 1])) {
+            jo = j[i]; i++;
+            if (isC(j[i]) && CJOIN[jo + j[i]] && !isV(j[i + 1])) { jo = CJOIN[jo + j[i]]; i++; }
+          }
+          out += String.fromCharCode(0xac00 + CHO.indexOf(c) * 588 + JUNG.indexOf(v) * 28 + JONG.indexOf(jo));
+        } else if (isV(c)) {
+          if (isV(j[i + 1]) && VJOIN[c + j[i + 1]]) { out += VJOIN[c + j[i + 1]]; i += 2; } else { out += c; i++; }
+        } else { out += c; i++; }
+      }
+      return out;
+    }
+    // 글자를 치는 도중(김ㅇ, 김읂 처럼 다음 글자의 첫 자음이 붙어 있는 상태)에도 찾아 줌
+    function typingMatch(name, q) {
+      const last = q[q.length - 1]; let head, tail;
+      if (CHO.includes(last)) { head = q.slice(0, -1); tail = last; }
+      else {
+        const code = last.charCodeAt(0) - 0xac00;
+        if (code < 0 || code >= 11172 || code % 28 === 0) return false;
+        const comps = CSPLIT[JONG[code % 28]] || JONG[code % 28];
+        tail = comps[comps.length - 1];
+        head = q.slice(0, -1) + String.fromCharCode(0xac00 + code - (code % 28) + JONG.indexOf(comps.slice(0, -1)));
+      }
+      if (!head || !name.startsWith(head) || name.length <= head.length) return false;
+      return choOf(name[head.length]) === tail;
+    }
+    function koreanize(el) { if (/[a-zA-Z]/.test(el.value)) el.value = toHangul(el.value); }
     let sgItems = [], sgIndex = -1;
     function updateSuggest() {
       const el = $('envName'), box = $('nameSuggest');
-      const q = el.value.trim();
+      const q = toHangul(el.value.trim());
       if (!q || !members.length || document.activeElement !== el) { hideSuggest(); return; }
       const qn = q.replace(/\s+/g, '');
       sgItems = members.filter(m => {
         const { name } = splitMember(m);
-        return isChoOnly(qn) ? choOf(name).startsWith(qn) : (name.includes(qn) || m.replace(/\s+/g, '').includes(qn));
+        return isChoOnly(qn) ? choOf(name).startsWith(qn) : (name.includes(qn) || m.replace(/\s+/g, '').includes(qn) || typingMatch(name, qn));
       }).sort((a, b) => (splitMember(a).name.startsWith(qn) ? 0 : 1) - (splitMember(b).name.startsWith(qn) ? 0 : 1)).slice(0, 8);
       if (!sgItems.length || (sgItems.length === 1 && sgItems[0] === q)) { hideSuggest(); return; }
       sgIndex = -1;
@@ -996,14 +1059,39 @@
       }
       return v;
     }
+    // 기타 헌금 추가 칸 (헌금명이 다른 기타 헌금을 여러 개)
+    function addSpecialRow(name, cashAmt, trfAmt, focus) {
+      const row = document.createElement('div');
+      row.className = 'line xsp';
+      row.innerHTML = `<span class="ln-k"><button type="button" class="xsp-del" aria-label="이 기타 헌금 칸 지우기">지우기</button></span>
+        <input class="inp special-name sp-name" placeholder="헌금명 (예: 성탄감사)" aria-label="추가 기타 헌금명">
+        <div class="money-wrap"><input class="inp money num sp-cash" inputmode="numeric" placeholder="—" aria-label="추가 기타 헌금 현금"><span>원</span></div>
+        <div class="money-wrap"><input class="inp money num sp-trf" inputmode="numeric" placeholder="—" aria-label="추가 기타 헌금 계좌이체"><span>원</span></div>`;
+      row.querySelector('.sp-name').value = name || '';
+      row.querySelector('.sp-cash').value = cashAmt ? won(cashAmt) : '';
+      row.querySelector('.sp-trf').value = trfAmt ? won(trfAmt) : '';
+      row.querySelectorAll('input.money').forEach(el => el.addEventListener('input', () => { formatMoneyInput(el); updateFormTotal(); }));
+      row.querySelector('.xsp-del').addEventListener('click', () => { row.remove(); updateFormTotal(); clearErrors('income'); });
+      $('btnAddSpecial').before(row);
+      if (focus) row.querySelector('.sp-name').focus();
+      return row;
+    }
+    function extraSpecials() {
+      return Array.from(document.querySelectorAll('.line.xsp')).map(row => ({ row,
+        name: row.querySelector('.sp-name').value.trim(),
+        cash: Number(digits(row.querySelector('.sp-cash').value)) || 0,
+        trf: Number(digits(row.querySelector('.sp-trf').value)) || 0 }));
+    }
+    function clearExtraSpecials() { document.querySelectorAll('.line.xsp').forEach(r => r.remove()); }
     function updateFormTotal() {
       let cash = 0, trans = 0;
       CAT_KEYS.forEach(k => { cash += moneyOf('amt_' + k); trans += moneyOf('trf_' + k); });
+      extraSpecials().forEach(x => { cash += x.cash; trans += x.trf; });
       const sum = cash + trans;
       $('envTotal').textContent = won(sum) + '원';
       $('envSplit').textContent = sum ? `현금 ${won(cash)} · 이체 ${won(trans)}` : '';
       $('nearSplit').textContent = sum ? (trans && cash ? `현금 ${won(cash)} · 이체 ${won(trans)}` : trans ? '전액 이체' : '전액 현금') : '';
-      document.querySelectorAll('.line').forEach(el => el.classList.toggle('has-amount', moneyOf('amt_' + el.dataset.cat) + moneyOf('trf_' + el.dataset.cat) > 0));
+      document.querySelectorAll('.line[data-cat]').forEach(el => el.classList.toggle('has-amount', moneyOf('amt_' + el.dataset.cat) + moneyOf('trf_' + el.dataset.cat) > 0));
     }
     // 추가하면 입력 화면 맨 위로: '목록에 추가했습니다' 카드와 다음 입력칸이 함께 보이게
     function showAddedCard(focusId) {
@@ -1013,7 +1101,7 @@
       setTimeout(() => $(focusId).focus({ preventScroll: true }), 350);
     }
     function formDirty(type) {
-      if (type === 'income') return ['envName', 'envWeeklyCount', 'envSpecialName', ...CAT_KEYS.map(k => 'amt_' + k), ...CAT_KEYS.map(k => 'trf_' + k)].some(id => $(id).value.trim());
+      if (type === 'income') return ['envName', 'envWeeklyCount', 'envSpecialName', ...CAT_KEYS.map(k => 'amt_' + k), ...CAT_KEYS.map(k => 'trf_' + k)].some(id => $(id).value.trim()) || extraSpecials().some(x => x.name || x.cash || x.trf);
       return ['expCategory', 'expAmount'].some(id => $(id).value.trim());
     }
     async function confirmLeaveForm(type) {
@@ -1337,14 +1425,24 @@
       clearErrors('income'); setSeg('income'); hideSuggest();
       $('envName').value = person === '주정헌금' ? '' : person;
       CAT_KEYS.forEach(k => { $('amt_' + k).value = ''; $('trf_' + k).value = ''; });
-      $('envWeeklyCount').value = ''; $('envSpecialName').value = '';
+      $('envWeeklyCount').value = ''; $('envSpecialName').value = ''; clearExtraSpecials();
+      const sp = new Map();
       // 종류마다 현금 합계 / 이체 합계로 채움 (같은 헌금을 현금·이체로 나눠 낸 것도 그대로 보임)
       const cash = {}, trf = {}; let weekly = 0;
       rows.forEach(r => linesOf(r).forEach(l => {
+        if (l.cat === 'special') {
+          const nm = splitName(r.name).special || '기타';
+          if (!sp.has(nm)) sp.set(nm, { cash: 0, trf: 0 });
+          sp.get(nm)[l.isTransfer ? 'trf' : 'cash'] += l.amount;
+          return;
+        }
         (l.isTransfer ? trf : cash)[l.cat] = ((l.isTransfer ? trf : cash)[l.cat] || 0) + l.amount;
         if (l.cat === 'weekly') weekly += (r.weeklyCount || 0);
-        if (l.cat === 'special' && splitName(r.name).special) $('envSpecialName').value = splitName(r.name).special;
       }));
+      Array.from(sp.entries()).forEach(([nm, v], i) => {
+        if (i === 0) { $('envSpecialName').value = nm; if (v.cash) cash.special = v.cash; if (v.trf) trf.special = v.trf; }
+        else addSpecialRow(nm, v.cash, v.trf, false);
+      });
       Object.entries(cash).forEach(([k, v]) => $('amt_' + k).value = won(v));
       Object.entries(trf).forEach(([k, v]) => $('trf_' + k).value = won(v));
       if (weekly) $('envWeeklyCount').value = weekly;
@@ -1378,7 +1476,7 @@
       clearErrors(type);
       if (type === 'income') {
         ['envName', 'envWeeklyCount', 'envSpecialName', ...CAT_KEYS.map(k => 'amt_' + k), ...CAT_KEYS.map(k => 'trf_' + k)].forEach(id => $(id).value = '');
-        hideSuggest();
+        hideSuggest(); clearExtraSpecials();
         $('incEditBanner').classList.remove('show'); $('incomeForm').classList.remove('editing');
         $('btnSaveInc').textContent = '목록에 추가';
         if (!silent) $('envName').focus({ preventScroll: true });
@@ -1402,6 +1500,7 @@
 
     async function submitIncome() {
       clearErrors('income'); hideSuggest();
+      koreanize($('envName'));
       let person = $('envName').value.trim();
       const cash = Object.fromEntries(CAT_KEYS.map(k => [k, moneyOf('amt_' + k)]));
       const trf = Object.fromEntries(CAT_KEYS.map(k => [k, moneyOf('trf_' + k)]));
@@ -1410,12 +1509,15 @@
       const weeklyCount = Number(digits($('envWeeklyCount').value)) || 0;
       const specialName = $('envSpecialName').value.trim();
       const isEdit = editMode && editMode.type === 'income';
-      if (!cats.length) return fieldError('income', '헌금 종류 중 한 칸 이상에 금액을 입력해주세요.', 'amt_tithe');
+      const extras = extraSpecials().filter(x => x.cash > 0 || x.trf > 0);
+      if (!cats.length && !extras.length) return fieldError('income', '헌금 종류 중 한 칸 이상에 금액을 입력해주세요.', 'amt_tithe');
       if (!person && cats.length === 1 && cats[0] === 'weekly') person = '주정헌금';
       if (!person && isEdit && editMode.person === '주정헌금') person = '주정헌금';
       if (!person) return fieldError('income', '성도 이름을 입력하거나 목록에서 골라주세요.', 'envName');
       if (has('weekly') && weeklyCount <= 0) return fieldError('income', '주정헌금을 낸 인원 수를 입력해주세요.', 'envWeeklyCount');
       if (has('special') && !specialName) return fieldError('income', '기타 헌금의 헌금명을 입력해주세요. (예: 성탄감사)', 'envSpecialName');
+      const noName = extras.find(x => !x.name);
+      if (noName) { fieldError('income', '추가한 기타 헌금의 헌금명을 입력해주세요.'); noName.row.querySelector('.sp-name').setAttribute('aria-invalid', 'true'); noName.row.querySelector('.sp-name').focus(); return; }
 
       const resolved = await resolvePerson(person);
       if (resolved == null) { $('envName').focus(); return; }
@@ -1427,18 +1529,23 @@
         if (!ok) { $('envName').focus(); return; }
       }
       const big = [];
+      extras.forEach(x => { if (x.cash >= LARGE_AMOUNT) big.push([null, `${x.name} 현금`, x.cash]); if (x.trf >= LARGE_AMOUNT) big.push([null, `${x.name} 이체`, x.trf]); });
       CAT_KEYS.forEach(k => { if (cash[k] >= LARGE_AMOUNT) big.push(['amt_' + k, `${CAT_LABEL[k]} 현금`, cash[k]]); if (trf[k] >= LARGE_AMOUNT) big.push(['trf_' + k, `${CAT_LABEL[k]} 이체`, trf[k]]); });
       if (big.length) {
         const ok = await ask({ title: '큰 금액이 맞는지 확인해주세요', tone: 'warn',
           html: big.map(b => `${b[1]} <b>${won(b[2])}원</b>`).join('<br>') + '<br>0이 하나 더 들어가지 않았나요?',
           actions: [{ label: '맞습니다', value: true, kind: 'primary' }, { label: '금액 고치기', value: false, kind: 'secondary' }] });
-        if (!ok) { $(big[0][0]).focus(); return; }
+        if (!ok) { const f = big.find(b => b[0]); if (f) $(f[0]).focus(); return; }
       }
       // 종류 × (현금, 이체) 마다 한 줄씩
       const newLines = [];
       CAT_KEYS.forEach(k => {
         if (cash[k] > 0) newLines.push(rowFor(person, k, cash[k], false, weeklyCount, specialName));
         if (trf[k] > 0) newLines.push(rowFor(person, k, trf[k], true, weeklyCount, specialName));
+      });
+      extras.forEach(x => {
+        if (x.cash > 0) newLines.push(rowFor(person, 'special', x.cash, false, 0, x.name));
+        if (x.trf > 0) newLines.push(rowFor(person, 'special', x.trf, true, 0, x.name));
       });
       // 주정헌금을 현금·이체로 나눈 경우 인원은 첫 줄에만
       let wSeen = false; newLines.forEach(l => { if (l.weekly > 0) { if (wSeen) l.weeklyCount = 0; wSeen = true; } });
